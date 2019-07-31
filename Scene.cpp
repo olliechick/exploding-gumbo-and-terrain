@@ -59,12 +59,14 @@ void initialise()
     GLuint shaderv = loadShader(GL_VERTEX_SHADER, "Scene.vert");
     GLuint shaderc = loadShader(GL_TESS_CONTROL_SHADER, "Scene.cont");
     GLuint shadere = loadShader(GL_TESS_EVALUATION_SHADER, "Scene.eval");
+    GLuint shaderg = loadShader(GL_GEOMETRY_SHADER, "Scene.geom");
     GLuint shaderf = loadShader(GL_FRAGMENT_SHADER, "Scene.frag");
 
     GLuint program = glCreateProgram();
     glAttachShader(program, shaderv);
     glAttachShader(program, shaderc);
     glAttachShader(program, shadere);
+    glAttachShader(program, shaderg);
     glAttachShader(program, shaderf);
     glLinkProgram(program);
 
@@ -82,12 +84,12 @@ void initialise()
 
 
     proj = glm::perspective(20.0f*CDR, 1.0f, 10.0f, 1000.0f);  //perspective projection matrix
-    view = glm::lookAt(glm::vec3(0.0, 5.0, 12.0), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0)); //view matrix
+    view = glm::lookAt(glm::vec3(0.0, 50.0, 150.0), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0)); //view matrix
     projView = proj*view;  //Product matrix
 
     //Read coordinates from file
     ifstream infile;
-    infile.open("PatchFiles/PatchVerts_Gumbo.txt", ios::in);
+    infile.open("PatchFiles/PatchVerts_Teapot.txt", ios::in);
     int nvert;
     infile >> nvert;
     float verts[nvert * 3];

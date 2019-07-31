@@ -84,12 +84,12 @@ void initialise()
 
 
     proj = glm::perspective(20.0f*CDR, 1.0f, 10.0f, 1000.0f);  //perspective projection matrix
-    view = glm::lookAt(glm::vec3(0.0, 50.0, 150.0), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0)); //view matrix
+    view = glm::lookAt(glm::vec3(100.0, 20.0, 100.0), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0)); //view matrix
     projView = proj*view;  //Product matrix
 
     //Read coordinates from file
     ifstream infile;
-    infile.open("PatchFiles/PatchVerts_Teapot.txt", ios::in);
+    infile.open("PatchFiles/PatchVerts_Gumbo.txt", ios::in);
     int nvert;
     infile >> nvert;
     float verts[nvert * 3];

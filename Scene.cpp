@@ -15,26 +15,29 @@
 #include <GL/freeglut.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+
 using namespace std;
 
 GLuint vaoID;
 GLuint theProgram;
 GLuint matrixLoc;
+GLuint program1;
+GLuint program2;
 float angle = 0.0;
 glm::mat4 projView;
-float CDR = 3.14159265/180.0;   //Conversion from degrees to radians (required in GLM 0.9.6 and later versions)
+float CDR = 3.14159265 / 180.0;   //Conversion from degrees to radians (required in GLM 0.9.6 and later versions)
 
 GLuint loadShader(GLenum shaderType, string filename)
 {
     ifstream shaderFile(filename.c_str());
-    if(!shaderFile.good()) {
+    if (!shaderFile.good()) {
         cout << "Error opening shader file." << endl;
     }
     stringstream shaderData;
     shaderData << shaderFile.rdbuf();
     shaderFile.close();
     string shaderStr = shaderData.str();
-    const char* shaderTxt = shaderStr.c_str();
+    const char *shaderTxt = shaderStr.c_str();
 
     GLuint shader = glCreateShader(shaderType);
     glShaderSource(shader, 1, &shaderTxt, NULL);
@@ -46,32 +49,16 @@ GLuint loadShader(GLenum shaderType, string filename)
         glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
         GLchar *strInfoLog = new GLchar[infoLogLength + 1];
         glGetShaderInfoLog(shader, infoLogLength, NULL, strInfoLog);
-        cerr <<  "Compile failure in shader: " << strInfoLog << endl;
+        cerr << "Compile failure in shader: " << strInfoLog << endl;
         delete[] strInfoLog;
     }
     return shader;
 }
 
-
-void initialise()
+void checkProgram(GLuint program)
 {
-    glm::mat4 proj, view;
-    GLuint shaderv = loadShader(GL_VERTEX_SHADER, "Scene.vert");
-    GLuint shaderc = loadShader(GL_TESS_CONTROL_SHADER, "Scene.cont");
-    GLuint shadere = loadShader(GL_TESS_EVALUATION_SHADER, "Scene.eval");
-    GLuint shaderg = loadShader(GL_GEOMETRY_SHADER, "Scene.geom");
-    GLuint shaderf = loadShader(GL_FRAGMENT_SHADER, "Scene.frag");
-
-    GLuint program = glCreateProgram();
-    glAttachShader(program, shaderv);
-    glAttachShader(program, shaderc);
-    glAttachShader(program, shadere);
-    glAttachShader(program, shaderg);
-    glAttachShader(program, shaderf);
-    glLinkProgram(program);
-
     GLint status;
-    glGetProgramiv (program, GL_LINK_STATUS, &status);
+    glGetProgramiv(program, GL_LINK_STATUS, &status);
     if (status == GL_FALSE) {
         GLint infoLogLength;
         glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLogLength);
@@ -80,12 +67,33 @@ void initialise()
         fprintf(stderr, "Linker failure: %s\n", strInfoLog);
         delete[] strInfoLog;
     }
-    glUseProgram(program);
+}
 
-
-    proj = glm::perspective(20.0f*CDR, 1.0f, 10.0f, 1000.0f);  //perspective projection matrix
+void initialise()
+{
+    glm::mat4 proj, view;
+    proj = glm::perspective(20.0f * CDR, 1.0f, 10.0f, 1000.0f);  //perspective projection matrix
     view = glm::lookAt(glm::vec3(100.0, 20.0, 100.0), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0)); //view matrix
-    projView = proj*view;  //Product matrix
+    projView = proj * view;  //Product matrix
+
+    // Bezier patch
+
+    GLuint shaderv = loadShader(GL_VERTEX_SHADER, "Scene.vert");
+    GLuint shaderc = loadShader(GL_TESS_CONTROL_SHADER, "Scene.cont");
+    GLuint shadere = loadShader(GL_TESS_EVALUATION_SHADER, "Scene.eval");
+    GLuint shaderg = loadShader(GL_GEOMETRY_SHADER, "Scene.geom");
+    GLuint shaderf = loadShader(GL_FRAGMENT_SHADER, "Scene.frag");
+
+    program1 = glCreateProgram();
+    glAttachShader(program1, shaderv);
+    glAttachShader(program1, shaderc);
+    glAttachShader(program1, shadere);
+    glAttachShader(program1, shaderg);
+    glAttachShader(program1, shaderf);
+    glLinkProgram(program1);
+
+    checkProgram(program1);
+    glUseProgram(program1);
 
     //Read coordinates from file
     ifstream infile;
@@ -93,8 +101,8 @@ void initialise()
     int nvert;
     infile >> nvert;
     float verts[nvert * 3];
-    for(int i = 0; i < nvert; i++) {
-        infile >> verts[3*i] >> verts[3*i + 1] >> verts[3*i + 2];
+    for (int i = 0; i < nvert; i++) {
+        infile >> verts[3 * i] >> verts[3 * i + 1] >> verts[3 * i + 2];
     }
     infile.close();
 
@@ -120,6 +128,7 @@ void initialise()
 
 void update(int value)
 {
+    glUseProgram(program1);
     angle++;
     glutTimerFunc(50, update, 0);
     glutPostRedisplay();
@@ -128,28 +137,29 @@ void update(int value)
 void display()
 {
     glm::mat4 matrix = glm::mat4(1.0);
-    matrix = glm::rotate(matrix, angle*CDR, glm::vec3(0.0, 1.0, 0.0));  //rotation matrix
+    matrix = glm::rotate(matrix, angle * CDR, glm::vec3(0.0, 1.0, 0.0));  //rotation matrix
     glm::mat4 prodMatrix = projView * matrix;        //Model-view-proj matrix
 
     glUniformMatrix4fv(matrixLoc, 1, GL_FALSE, &prodMatrix[0][0]);
 
-    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+    glUseProgram(program1);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glBindVertexArray(vaoID);
     glDrawArrays(GL_PATCHES, 0, 2048);
     glPatchParameteri(GL_PATCH_VERTICES, 16);
     glFlush();
 }
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_RGB|GLUT_DEPTH);
+    glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH);
     glutInitWindowSize(500, 500);
     glutCreateWindow("COSC422: Ollie Chick");
-    glutInitContextVersion (4, 2);
-    glutInitContextProfile ( GLUT_CORE_PROFILE );
+    glutInitContextVersion(4, 2);
+    glutInitContextProfile(GLUT_CORE_PROFILE);
 
-    if(glewInit() == GLEW_OK) {
+    if (glewInit() == GLEW_OK) {
         cout << "GLEW initialization successful! " << endl;
         cout << " Using GLEW version " << glewGetString(GLEW_VERSION) << endl;
     } else {

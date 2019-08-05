@@ -78,11 +78,11 @@ void initialise()
 
     // Bezier patch
 
-    GLuint shaderv = loadShader(GL_VERTEX_SHADER, "Scene.vert");
-    GLuint shaderc = loadShader(GL_TESS_CONTROL_SHADER, "Scene.cont");
-    GLuint shadere = loadShader(GL_TESS_EVALUATION_SHADER, "Scene.eval");
-    GLuint shaderg = loadShader(GL_GEOMETRY_SHADER, "Scene.geom");
-    GLuint shaderf = loadShader(GL_FRAGMENT_SHADER, "Scene.frag");
+    GLuint shaderv = loadShader(GL_VERTEX_SHADER, "shaders/Scene.vert");
+    GLuint shaderc = loadShader(GL_TESS_CONTROL_SHADER, "shaders/Scene.tesc");
+    GLuint shadere = loadShader(GL_TESS_EVALUATION_SHADER, "shaders/Scene.tese");
+    GLuint shaderg = loadShader(GL_GEOMETRY_SHADER, "shaders/Scene.geom");
+    GLuint shaderf = loadShader(GL_FRAGMENT_SHADER, "shaders/Scene.frag");
 
     program1 = glCreateProgram();
     glAttachShader(program1, shaderv);

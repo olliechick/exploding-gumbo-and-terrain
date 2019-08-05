@@ -1,6 +1,9 @@
 # JetBrains
 .idea/*
 
+# Network file share temp files
+.nfs*
+
 # Prerequisites
 *.d
 

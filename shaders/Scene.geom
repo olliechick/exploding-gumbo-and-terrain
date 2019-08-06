@@ -9,12 +9,40 @@ uniform mat4 norMatrix;
 uniform vec4 lightPos;
 out vec4 oColor;
 
+vec3 calculateNormal(float x1, float y1, float z1,
+float x2, float y2, float z2,
+float x3, float y3, float z3)
+{
+    float nx, ny, nz;
+    nx = y1*(z2-z3) + y2*(z3-z1) + y3*(z1-z2);
+    ny = z1*(x2-x3) + z2*(x3-x1) + z3*(x1-x2);
+    nz = x1*(y2-y3) + x2*(y3-y1) + x3*(y1-y2);
+    return vec3(nx, ny, nz);
+}
+
+vec3 calculateNormal(vec4 v1, vec4 v2, vec4 v3)
+{
+    return calculateNormal(v1.x, v1.y, v1.z, v2.x, v2.y, v2.z, v3.x, v3.y, v3.z);
+}
+
 void main()
 {
+    vec4 material = vec4(0, 1.0, 0, 1); // green
+    vec4 ambOut, diffOut, specOut = vec4(0);
+
+    ambOut = 0.4 * material;
+
+    vec4 position = gl_in[0].gl_Position;
+    vec3 normal = vec3(normalize(calculateNormal(gl_in[0].gl_Position, gl_in[1].gl_Position, gl_in[2].gl_Position)));
+    vec4 posnEye = mvMatrix * position;
+    vec4 normalEye = norMatrix * vec4(normal, 0);
+    vec4 lgtVec = normalize(lightPos - posnEye);
+    float diffTerm = max(dot(lgtVec, normalEye), 0.0);
+    diffOut = diffTerm * material;
+
     for (int i = 0; i < gl_in.length(); i++) {
         gl_Position = mvpMatrix * gl_in[i].gl_Position;
-        oColor = vec4(0, 0, 1, 1);
-        //todo oColor = ambOut + diffOut + specOut;
+        oColor = ambOut + diffOut + specOut;
         EmitVertex();
     }
     EndPrimitive();

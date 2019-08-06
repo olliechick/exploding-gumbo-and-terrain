@@ -20,9 +20,9 @@ using namespace std;
 
 GLuint vaoID;
 GLuint theProgram;
-GLuint matrixLoc;
+GLuint mvMatrixLoc, mvpMatrixLoc, norMatrixLoc, lgtLoc;
 float angle = 0.0;
-glm::mat4 projView;
+glm::mat4 proj, view, projView;
 float CDR = 3.14159265 / 180.0;   //Conversion from degrees to radians (required in GLM 0.9.6 and later versions)
 
 GLuint loadShader(GLenum shaderType, string filename)
@@ -54,7 +54,6 @@ GLuint loadShader(GLenum shaderType, string filename)
 
 void initialise()
 {
-    glm::mat4 proj, view;
     GLuint shaderv = loadShader(GL_VERTEX_SHADER, "shaders/Scene.vert");
     GLuint shaderc = loadShader(GL_TESS_CONTROL_SHADER, "shaders/Scene.tesc");
     GLuint shadere = loadShader(GL_TESS_EVALUATION_SHADER, "shaders/Scene.tese");
@@ -81,7 +80,10 @@ void initialise()
     }
     glUseProgram(program);
 
-    matrixLoc = glGetUniformLocation(program, "mvpMatrix");
+    mvpMatrixLoc = glGetUniformLocation(program, "mvpMatrix");
+    mvMatrixLoc = glGetUniformLocation(program, "mvMatrix");
+    norMatrixLoc = glGetUniformLocation(program, "norMatrix");
+    lgtLoc = glGetUniformLocation(program, "lightPos");
 
     proj = glm::perspective(20.0f * CDR, 1.0f, 10.0f, 1000.0f);  //perspective projection matrix
     view = glm::lookAt(glm::vec3(0.0, 50.0, 150.0), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0)); //view matrix
@@ -114,24 +116,32 @@ void initialise()
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
 void update(int value)
 {
-    angle++;
+    angle+=10;
     glutTimerFunc(50, update, 0);
     glutPostRedisplay();
 }
 
 void display()
 {
-    glm::mat4 matrix = glm::mat4(1.0);
-    matrix = glm::rotate(matrix, angle * CDR, glm::vec3(0.0, 1.0, 0.0));  //rotation matrix
-    glm::mat4 prodMatrix = projView * matrix;        //Model-view-proj matrix
+    glm::mat4 mvMatrix = glm::mat4(1.0);
+    mvMatrix = glm::rotate(mvMatrix, angle * CDR, glm::vec3(0.0, 1.0, 0.0));  //rotation matrix
+    glm::mat4 prodMatrix = projView * mvMatrix;        //Model-view-proj matrix
+    glm::mat4 invMatrix = glm::inverse(mvMatrix);  //Inverse of model-view matrix for normal transformation
+    mvMatrix = view * mvMatrix;
 
-    glUniformMatrix4fv(matrixLoc, 1, GL_FALSE, &prodMatrix[0][0]);
+    glm::vec4 light = glm::vec4(20.0, 10.0, 20.0, 1.0);
+    glm::vec4 lightEye = view * light;     //Light position in eye coordinates
+
+    glUniformMatrix4fv(mvpMatrixLoc, 1, GL_FALSE, &prodMatrix[0][0]);
+    glUniformMatrix4fv(mvMatrixLoc, 1, GL_FALSE, &mvMatrix[0][0]);
+    glUniformMatrix4fv(norMatrixLoc, 1, GL_TRUE, &invMatrix[0][0]);  //Use transpose matrix here
+    glUniform4fv(lgtLoc, 1, &lightEye[0]);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glBindVertexArray(vaoID);

@@ -9,15 +9,22 @@ void main()
     float u = gl_TessCoord.x;
     float v = gl_TessCoord.y;
 
-    posn = (1-u)*(1-u) * ((1-v)*(1-v)*gl_in[6].gl_Position
-    + 2*v*(1-v)*gl_in[7].gl_Position
-    + v*v*gl_in[8].gl_Position)
-    + 2*(1-u)*u   * ((1-v)*(1-v)*gl_in[3].gl_Position
-    + 2*v*(1-v)*gl_in[4].gl_Position
-    + v*v*gl_in[5].gl_Position)
-    + u*u         * ((1-v)*(1-v)*gl_in[0].gl_Position
-    + 2*v*(1-v)*gl_in[1].gl_Position
-    + v*v*gl_in[2].gl_Position);
+    float Au = (1-u) * (1-u) * (1-u);
+    float Bu = 3 * u * (1-u) * (1-u);
+    float Cu = 3 * u * u * (1-u);
+    float Du = u * u * u;
 
-    gl_Position = mvpMatrix * posn;
+    float Av = (1-v) * (1-v) * (1-v);
+    float Bv = 3 * v * (1-v) * (1-v);
+    float Cv = 3 * v * v * (1-v);
+    float Dv = v * v * v;
+
+    gl_Position = Au * (Av * gl_in[0].gl_Position + Bv * gl_in[1].gl_Position
+    +  Cv * gl_in[2].gl_Position + Dv * gl_in[3].gl_Position)
+    + Bu * (Av * gl_in[4].gl_Position + Bv * gl_in[5].gl_Position
+    +  Cv * gl_in[6].gl_Position + Dv * gl_in[7].gl_Position)
+    + Cu * (Av * gl_in[8].gl_Position + Bv * gl_in[9].gl_Position
+    +  Cv * gl_in[10].gl_Position + Dv * gl_in[11].gl_Position)
+    + Du * (Av * gl_in[12].gl_Position + Bv * gl_in[13].gl_Position
+    + Cv * gl_in[14].gl_Position + Dv * gl_in[15].gl_Position);
 }

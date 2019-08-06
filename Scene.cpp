@@ -15,7 +15,6 @@
 #include <GL/freeglut.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include "Scene.h"
 
 using namespace std;
 
@@ -60,12 +59,14 @@ void initialise()
     GLuint shaderc = loadShader(GL_TESS_CONTROL_SHADER, "shaders/Scene.tesc");
     GLuint shadere = loadShader(GL_TESS_EVALUATION_SHADER, "shaders/Scene.tese");
     GLuint shaderf = loadShader(GL_FRAGMENT_SHADER, "shaders/Scene.frag");
+    GLuint shaderg = loadShader(GL_GEOMETRY_SHADER, "shaders/Scene.geom");
 
     GLuint program = glCreateProgram();
     glAttachShader(program, shaderv);
     glAttachShader(program, shaderc);
     glAttachShader(program, shadere);
     glAttachShader(program, shaderf);
+    glAttachShader(program, shaderg);
     glLinkProgram(program);
 
     GLint status;
@@ -83,23 +84,31 @@ void initialise()
     matrixLoc = glGetUniformLocation(program, "mvpMatrix");
 
     proj = glm::perspective(20.0f * CDR, 1.0f, 10.0f, 1000.0f);  //perspective projection matrix
-    view = glm::lookAt(glm::vec3(0.0, 5.0, 12.0), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0)); //view matrix
+    view = glm::lookAt(glm::vec3(0.0, 50.0, 150.0), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0)); //view matrix
     projView = proj * view;  //Product matrix
+
+    //Read coordinates from file
+    ifstream infile;
+    infile.open("PatchFiles/PatchVerts_Gumbo.txt", ios::in);
+    int nvert;
+    infile >> nvert;
+    float verts[nvert * 3];
+    for (int i = 0; i < nvert; i++) {
+        infile >> verts[3 * i] >> verts[3 * i + 1] >> verts[3 * i + 2];
+    }
+    infile.close();
 
     GLuint vboID[4];
 
     glGenVertexArrays(1, &vaoID);
     glBindVertexArray(vaoID);
 
-    glGenVertexArrays(2, vboID);
+    glGenVertexArrays(1, vboID);
 
     glBindBuffer(GL_ARRAY_BUFFER, vboID[0]);
     glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
     glEnableVertexAttribArray(0);  // Vertex position
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboID[1]);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elems), elems, GL_STATIC_DRAW);
 
     glBindVertexArray(0);
 
@@ -126,8 +135,8 @@ void display()
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glBindVertexArray(vaoID);
-    glDrawElements(GL_PATCHES, 24, GL_UNSIGNED_SHORT, NULL);
-    glPatchParameteri(GL_PATCH_VERTICES, 4);
+    glDrawArrays(GL_PATCHES, 0, 2048);
+    glPatchParameteri(GL_PATCH_VERTICES, 16);
     glFlush();
 }
 
@@ -136,7 +145,7 @@ int main(int argc, char **argv)
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH);
     glutInitWindowSize(500, 500);
-    glutCreateWindow("Cube with Bezier patches");
+    glutCreateWindow("COSC422: Ollie Chick");
     glutInitContextVersion(4, 2);
     glutInitContextProfile(GLUT_CORE_PROFILE);
 

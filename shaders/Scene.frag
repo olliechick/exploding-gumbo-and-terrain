@@ -3,7 +3,7 @@
 in vec4 oColor;
 
 
-void main() 
+void main()
 {
-     gl_FragColor = oColor;
+    gl_FragColor = oColor;
 }

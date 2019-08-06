@@ -56,10 +56,10 @@ GLuint loadShader(GLenum shaderType, string filename)
 void initialise()
 {
 	glm::mat4 proj, view;
-	GLuint shaderv = loadShader(GL_VERTEX_SHADER, "Scene.vert");
-	GLuint shaderc = loadShader(GL_TESS_CONTROL_SHADER, "Scene.cont");
-	GLuint shadere = loadShader(GL_TESS_EVALUATION_SHADER, "Scene.eval");
-	GLuint shaderf = loadShader(GL_FRAGMENT_SHADER, "Scene.frag");
+	GLuint shaderv = loadShader(GL_VERTEX_SHADER, "shaders/Scene.vert");
+	GLuint shaderc = loadShader(GL_TESS_CONTROL_SHADER, "shaders/Scene.tesc");
+	GLuint shadere = loadShader(GL_TESS_EVALUATION_SHADER, "shaders/Scene.tese");
+	GLuint shaderf = loadShader(GL_FRAGMENT_SHADER, "shaders/Scene.frag");
 
 	GLuint program = glCreateProgram();
 	glAttachShader(program, shaderv);

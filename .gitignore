@@ -30,3 +30,12 @@
 *.exe
 *.out
 *.app
+
+# JetBrains
+.idea/*
+
+# Cmake artefacts
+cmake-build-debug/*
+
+# Network file share temp files
+.nfs*

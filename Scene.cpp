@@ -81,6 +81,7 @@ void initialise()
 	}
 	glUseProgram(program);
 
+    matrixLoc = glGetUniformLocation(program, "mvpMatrix");
 
 	proj = glm::perspective(20.0f*CDR, 1.0f, 10.0f, 1000.0f);  //perspective projection matrix
 	view = glm::lookAt(glm::vec3(0.0, 5.0, 12.0), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0)); //view matrix

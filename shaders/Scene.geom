@@ -31,7 +31,7 @@ void main()
     vec4 ambOut, diffOut, specOut = vec4(0);
     vec4 white = vec4(1.0);
 
-    ambOut = 0.4 * material;
+    ambOut = 0.1 * material;
 
     vec4 position = gl_in[0].gl_Position;
     vec3 normal = vec3(normalize(calculateNormal(gl_in[0].gl_Position, gl_in[1].gl_Position, gl_in[2].gl_Position)));

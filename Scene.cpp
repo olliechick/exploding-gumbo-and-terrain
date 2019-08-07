@@ -62,10 +62,6 @@ void handleKeyboardInput(unsigned char key, int x, int y)
         else mode = GL_FILL;
         glPolygonMode(GL_FRONT_AND_BACK, mode);
     } else if (key == ' ') material.r += 0.05;
-    else if (key == 'a')look_angle += 0.1;
-    else if (key == 'd') look_angle -= 0.1;
-
-    eye = glm::vec3(lookAt.x - 100 * sin(look_angle), lookAt.y, lookAt.z + 100 * cos(look_angle));
 }
 
 void handleSpecialInput(int key, int x, int y)
@@ -76,13 +72,9 @@ void handleSpecialInput(int key, int x, int y)
     } else if (key == GLUT_KEY_DOWN) {
         eye.x -= sin(cam_angle);
         eye.z += cos(cam_angle);
-    } else if (key == GLUT_KEY_LEFT) cam_angle -= 0.01;
-    else if (key == GLUT_KEY_RIGHT) cam_angle += 0.01;
-    else if (key == GLUT_KEY_PAGE_UP) eye.y += 1;
-    else if (key == GLUT_KEY_PAGE_DOWN) eye.y -= 1;
+    }
 
     lookAt = glm::vec3(eye.x + 100 * sin(cam_angle), eye.y, eye.z - 100 * cos(cam_angle));
-//    lookAt.x -= 100 * sin(cam_angle) + 100 * sin(cam_angle)
 }
 
 

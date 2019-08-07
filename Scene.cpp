@@ -53,6 +53,17 @@ GLuint loadShader(GLenum shaderType, string filename)
 }
 
 
+void handleKeyboardInput(unsigned char key, int x, int y)
+{
+    if (key == 'r' && material.r < 1) material.r += 0.1;
+    else if (key == 'g' && material.g < 1) material.g += 0.1;
+    else if (key == 'b' && material.b < 1) material.b += 0.1;
+    else if (key == 'e' && material.r > 0) material.r -= 0.1;
+    else if (key == 'f' && material.g > 0) material.g -= 0.1;
+    else if (key == 'v' && material.b > 0) material.b -= 0.1;
+}
+
+
 void initialise()
 {
     GLuint shaderv = loadShader(GL_VERTEX_SHADER, "shaders/Scene.vert");
@@ -122,6 +133,7 @@ void initialise()
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
     material = glm::vec4(0, 0, 1, 1);
+    glutKeyboardFunc(handleKeyboardInput);
 }
 
 void update(int value)

@@ -21,6 +21,7 @@ using namespace std;
 GLuint vaoID;
 GLuint theProgram;
 GLuint mvMatrixLoc, mvpMatrixLoc, norMatrixLoc, lgtLoc, materialLoc;
+GLenum mode = GL_FILL;
 float angle = 0.0;
 glm::mat4 proj, view, projView;
 glm::vec4 material;
@@ -55,12 +56,11 @@ GLuint loadShader(GLenum shaderType, string filename)
 
 void handleKeyboardInput(unsigned char key, int x, int y)
 {
-    if (key == 'r' && material.r < 1) material.r += 0.1;
-    else if (key == 'g' && material.g < 1) material.g += 0.1;
-    else if (key == 'b' && material.b < 1) material.b += 0.1;
-    else if (key == 'e' && material.r > 0) material.r -= 0.1;
-    else if (key == 'f' && material.g > 0) material.g -= 0.1;
-    else if (key == 'v' && material.b > 0) material.b -= 0.1;
+    if (key == 'w') {
+        if (mode == GL_FILL) mode = GL_LINE;
+        else mode = GL_FILL;
+        glPolygonMode(GL_FRONT_AND_BACK, mode);
+    }
 }
 
 

@@ -20,9 +20,10 @@ using namespace std;
 
 GLuint vaoID;
 GLuint theProgram;
-GLuint mvMatrixLoc, mvpMatrixLoc, norMatrixLoc, lgtLoc;
+GLuint mvMatrixLoc, mvpMatrixLoc, norMatrixLoc, lgtLoc, materialLoc;
 float angle = 0.0;
 glm::mat4 proj, view, projView;
+glm::vec4 material;
 float CDR = 3.14159265 / 180.0;   //Conversion from degrees to radians (required in GLM 0.9.6 and later versions)
 
 GLuint loadShader(GLenum shaderType, string filename)
@@ -84,6 +85,7 @@ void initialise()
     mvMatrixLoc = glGetUniformLocation(program, "mvMatrix");
     norMatrixLoc = glGetUniformLocation(program, "norMatrix");
     lgtLoc = glGetUniformLocation(program, "lightPos");
+    materialLoc = glGetUniformLocation(program, "material");
 
     proj = glm::perspective(20.0f * CDR, 1.0f, 10.0f, 1000.0f);  //perspective projection matrix
     view = glm::lookAt(glm::vec3(0.0, 50.0, 150.0), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0)); //view matrix
@@ -118,11 +120,13 @@ void initialise()
     glEnable(GL_CULL_FACE);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+
+    material = glm::vec4(0, 0, 1, 1);
 }
 
 void update(int value)
 {
-    angle+=10;
+    angle++;
     glutTimerFunc(50, update, 0);
     glutPostRedisplay();
 }
@@ -142,6 +146,7 @@ void display()
     glUniformMatrix4fv(mvMatrixLoc, 1, GL_FALSE, &mvMatrix[0][0]);
     glUniformMatrix4fv(norMatrixLoc, 1, GL_TRUE, &invMatrix[0][0]);  //Use transpose matrix here
     glUniform4fv(lgtLoc, 1, &lightEye[0]);
+    glUniform4fv(materialLoc, 1, &material[0]);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glBindVertexArray(vaoID);

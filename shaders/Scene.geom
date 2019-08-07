@@ -7,6 +7,7 @@ uniform mat4 mvMatrix;
 uniform mat4 mvpMatrix;
 uniform mat4 norMatrix;
 uniform vec4 lightPos;
+uniform vec4 material;
 out vec4 oColor;
 
 vec3 calculateNormal(float x1, float y1, float z1,
@@ -27,7 +28,6 @@ vec3 calculateNormal(vec4 v1, vec4 v2, vec4 v3)
 
 void main()
 {
-    vec4 material = vec4(0, 1.0, 0, 1); // green
     vec4 ambOut, diffOut, specOut = vec4(0);
 
     ambOut = 0.4 * material;

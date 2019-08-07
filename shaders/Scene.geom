@@ -29,6 +29,7 @@ vec3 calculateNormal(vec4 v1, vec4 v2, vec4 v3)
 void main()
 {
     vec4 ambOut, diffOut, specOut = vec4(0);
+    vec4 white = vec4(1.0);
 
     ambOut = 0.4 * material;
 
@@ -39,6 +40,13 @@ void main()
     vec4 lgtVec = normalize(lightPos - posnEye);
     float diffTerm = max(dot(lgtVec, normalEye), 0.0);
     diffOut = diffTerm * material;
+
+    vec4 viewVec = normalize(vec4(-posnEye.xyz, 0));
+    vec4 halfVec = normalize(lgtVec + viewVec);
+    float shininess = 100.0;
+    float specTerm = max(dot(halfVec, normalEye), 0);
+    specOut = white * pow(specTerm, shininess);
+
 
     for (int i = 0; i < gl_in.length(); i++) {
         gl_Position = mvpMatrix * gl_in[i].gl_Position;

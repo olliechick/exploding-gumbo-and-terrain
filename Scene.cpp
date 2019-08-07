@@ -22,9 +22,10 @@ GLuint vaoID;
 GLuint theProgram;
 GLuint mvMatrixLoc, mvpMatrixLoc, norMatrixLoc, lgtLoc, materialLoc;
 GLenum mode = GL_FILL;
-float angle = 0.0;
+float cam_angle, look_angle = 0;
 glm::mat4 proj, view, projView;
 glm::vec4 material;
+glm::vec3 eye, lookAt;
 float CDR = 3.14159265 / 180.0;   //Conversion from degrees to radians (required in GLM 0.9.6 and later versions)
 
 GLuint loadShader(GLenum shaderType, string filename)
@@ -61,6 +62,27 @@ void handleKeyboardInput(unsigned char key, int x, int y)
         else mode = GL_FILL;
         glPolygonMode(GL_FRONT_AND_BACK, mode);
     } else if (key == ' ') material.r += 0.05;
+    else if (key == 'a')look_angle += 0.1;
+    else if (key == 'd') look_angle -= 0.1;
+
+    eye = glm::vec3(lookAt.x - 100 * sin(look_angle), lookAt.y, lookAt.z + 100 * cos(look_angle));
+}
+
+void handleSpecialInput(int key, int x, int y)
+{
+    if (key == GLUT_KEY_UP) {
+        eye.x += sin(cam_angle);
+        eye.z -= cos(cam_angle);
+    } else if (key == GLUT_KEY_DOWN) {
+        eye.x -= sin(cam_angle);
+        eye.z += cos(cam_angle);
+    } else if (key == GLUT_KEY_LEFT) cam_angle -= 0.01;
+    else if (key == GLUT_KEY_RIGHT) cam_angle += 0.01;
+    else if (key == GLUT_KEY_PAGE_UP) eye.y += 1;
+    else if (key == GLUT_KEY_PAGE_DOWN) eye.y -= 1;
+
+    lookAt = glm::vec3(eye.x + 100 * sin(cam_angle), eye.y, eye.z - 100 * cos(cam_angle));
+//    lookAt.x -= 100 * sin(cam_angle) + 100 * sin(cam_angle)
 }
 
 
@@ -99,8 +121,8 @@ void initialise()
     materialLoc = glGetUniformLocation(program, "material");
 
     proj = glm::perspective(20.0f * CDR, 1.0f, 10.0f, 1000.0f);  //perspective projection matrix
-    view = glm::lookAt(glm::vec3(0.0, 50.0, 150.0), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0)); //view matrix
-    projView = proj * view;  //Product matrix
+    eye = glm::vec3(0.0, 10.0, 100.0);
+    lookAt = glm::vec3(eye.x + 100 * sin(cam_angle), eye.y, eye.z - 100 * cos(cam_angle));
 
     //Read coordinates from file
     ifstream infile;
@@ -134,19 +156,22 @@ void initialise()
 
     material = glm::vec4(0, 0.8, 0.8, 1);
     glutKeyboardFunc(handleKeyboardInput);
+    glutSpecialFunc(handleSpecialInput);
 }
 
 void update(int value)
 {
-    angle++;
     glutTimerFunc(50, update, 0);
     glutPostRedisplay();
 }
 
 void display()
 {
+    view = glm::lookAt(eye, lookAt, glm::vec3(0.0, 1.0, 0.0)); //view matrix
+    projView = proj * view;  //Product matrix
+
     glm::mat4 mvMatrix = glm::mat4(1.0);
-    mvMatrix = glm::rotate(mvMatrix, angle * CDR, glm::vec3(0.0, 1.0, 0.0));  //rotation matrix
+    mvMatrix = glm::rotate(mvMatrix, CDR, glm::vec3(0.0, 1.0, 0.0));  //rotation matrix
     glm::mat4 prodMatrix = projView * mvMatrix;        //Model-view-proj matrix
     glm::mat4 invMatrix = glm::inverse(mvMatrix);  //Inverse of model-view matrix for normal transformation
     mvMatrix = view * mvMatrix;

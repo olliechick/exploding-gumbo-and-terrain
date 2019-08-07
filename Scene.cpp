@@ -60,7 +60,7 @@ void handleKeyboardInput(unsigned char key, int x, int y)
         if (mode == GL_FILL) mode = GL_LINE;
         else mode = GL_FILL;
         glPolygonMode(GL_FRONT_AND_BACK, mode);
-    }
+    } else if (key == ' ') material.r += 0.05;
 }
 
 
@@ -132,7 +132,7 @@ void initialise()
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-    material = glm::vec4(0, 0, 1, 1);
+    material = glm::vec4(0, 0.8, 0.8, 1);
     glutKeyboardFunc(handleKeyboardInput);
 }
 

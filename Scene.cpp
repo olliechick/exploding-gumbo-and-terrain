@@ -54,6 +54,20 @@ GLuint loadShader(GLenum shaderType, string filename)
     return shader;
 }
 
+void checkProgram(GLuint program)
+{
+    GLint status;
+    glGetProgramiv(program, GL_LINK_STATUS, &status);
+    if (status == GL_FALSE) {
+        GLint infoLogLength;
+        glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLogLength);
+        GLchar *strInfoLog = new GLchar[infoLogLength + 1];
+        glGetProgramInfoLog(program, infoLogLength, NULL, strInfoLog);
+        fprintf(stderr, "Linker failure: %s\n", strInfoLog);
+        delete[] strInfoLog;
+    }
+}
+
 
 void handleKeyboardInput(unsigned char key, int x, int y)
 {
@@ -90,32 +104,23 @@ void initialise()
     GLuint shaderf = loadShader(GL_FRAGMENT_SHADER, "shaders/Scene.frag");
     GLuint shaderg = loadShader(GL_GEOMETRY_SHADER, "shaders/Scene.geom");
 
-    GLuint program = glCreateProgram();
-    glAttachShader(program, shaderv);
-    glAttachShader(program, shaderc);
-    glAttachShader(program, shadere);
-    glAttachShader(program, shaderf);
-    glAttachShader(program, shaderg);
-    glLinkProgram(program);
+    GLuint program1 = glCreateProgram();
+    glAttachShader(program1, shaderv);
+    glAttachShader(program1, shaderc);
+    glAttachShader(program1, shadere);
+    glAttachShader(program1, shaderf);
+    glAttachShader(program1, shaderg);
+    glLinkProgram(program1);
 
-    GLint status;
-    glGetProgramiv(program, GL_LINK_STATUS, &status);
-    if (status == GL_FALSE) {
-        GLint infoLogLength;
-        glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLogLength);
-        GLchar *strInfoLog = new GLchar[infoLogLength + 1];
-        glGetProgramInfoLog(program, infoLogLength, NULL, strInfoLog);
-        fprintf(stderr, "Linker failure: %s\n", strInfoLog);
-        delete[] strInfoLog;
-    }
-    glUseProgram(program);
+    checkProgram(program1);
+    glUseProgram(program1);
 
-    mvpMatrixLoc = glGetUniformLocation(program, "mvpMatrix");
-    mvMatrixLoc = glGetUniformLocation(program, "mvMatrix");
-    norMatrixLoc = glGetUniformLocation(program, "norMatrix");
-    lgtLoc = glGetUniformLocation(program, "lightPos");
-    materialLoc = glGetUniformLocation(program, "material");
-    dLoc = glGetUniformLocation(program, "d");
+    mvpMatrixLoc = glGetUniformLocation(program1, "mvpMatrix");
+    mvMatrixLoc = glGetUniformLocation(program1, "mvMatrix");
+    norMatrixLoc = glGetUniformLocation(program1, "norMatrix");
+    lgtLoc = glGetUniformLocation(program1, "lightPos");
+    materialLoc = glGetUniformLocation(program1, "material");
+    dLoc = glGetUniformLocation(program1, "d");
 
     proj = glm::perspective(20.0f * CDR, 1.0f, 10.0f, 1000.0f);  //perspective projection matrix
     eye = glm::vec3(0.0, 10.0, 100.0);

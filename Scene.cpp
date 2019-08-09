@@ -161,12 +161,6 @@ void initialise()
     glutSpecialFunc(handleSpecialInput);
 }
 
-void update(int value)
-{
-    glutTimerFunc(50, update, 0);
-    glutPostRedisplay();
-}
-
 void display()
 {
     view = glm::lookAt(eye, lookAt, glm::vec3(0.0, 1.0, 0.0)); //view matrix
@@ -214,7 +208,6 @@ int main(int argc, char **argv)
 
     initialise();
     glutDisplayFunc(display);
-    glutTimerFunc(50, update, 0);
     glutMainLoop();
 }
 

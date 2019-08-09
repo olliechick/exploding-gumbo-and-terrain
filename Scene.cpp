@@ -22,7 +22,9 @@ GLuint vaoID, vaoIDFloor;
 GLuint mvMatrixLoc, mvpMatrixLoc, norMatrixLoc, lgtLoc, materialLoc, dLoc, mvpMatrixLoc2;
 GLenum mode = GL_FILL;
 GLuint program1, program2;
-float cam_angle, look_angle = 0;
+float cam_angle = 0;
+float verts[100 * 3];       //10x10 grid (100 vertices)
+GLushort elems[81 * 4];       //Element array for 81 quad patches
 glm::mat4 proj, view, projView;
 glm::vec4 material;
 glm::vec3 eye, lookAt;
@@ -74,7 +76,6 @@ void handleKeyboardInput(unsigned char key, int x, int y)
     if (key == 'w') {
         if (mode == GL_FILL) mode = GL_LINE;
         else mode = GL_FILL;
-        glPolygonMode(GL_FRONT_AND_BACK, mode);
     } else if (key == ' ') material.r += 0.05;
 
     glutPostRedisplay();
@@ -95,11 +96,42 @@ void handleSpecialInput(int key, int x, int y)
     float deltax = eye.x;
     float deltaz = eye.z;
     d = sqrt(deltax * deltax + deltaz * deltaz);
-    cout << d << "\n";
+    cout << d << "\n"; //todo remove
     lookAt = glm::vec3(eye.x + 100 * sin(cam_angle), eye.y, eye.z - 100 * cos(cam_angle));
 
     glutPostRedisplay();
 }
+
+
+//Generate vertex and element data for the terrain floor
+//From Terrain.cpp
+void generateData()
+{
+    int indx, start;
+    //verts array
+    for (int i = 0; i < 10; i++)   //100 vertices on a 10x10 grid
+    {
+        for (int j = 0; j < 10; j++) {
+            indx = 10 * i + j;
+            verts[3 * indx] = 10 * i - 45;        //x  varies from -45 to +45
+            verts[3 * indx + 1] = 0;            //y  is set to 0 (ground plane)
+            verts[3 * indx + 2] = -10 * j;        //z  varies from 0 to -100
+        }
+    }
+
+    //elems array
+    for (int i = 0; i < 9; i++) {
+        for (int j = 0; j < 9; j++) {
+            indx = 9 * i + j;
+            start = 10 * i + j;
+            elems[4 * indx] = start;
+            elems[4 * indx + 1] = start + 10;
+            elems[4 * indx + 2] = start + 11;
+            elems[4 * indx + 3] = start + 1;
+        }
+    }
+}
+
 
 void initialise()
 {
@@ -163,7 +195,6 @@ void initialise()
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
     // Floor
@@ -182,24 +213,40 @@ void initialise()
     // Uniform variables
     mvpMatrixLoc2 = glGetUniformLocation(program2, "mvpMatrix");
 
-    // Temp data
-    static const GLfloat g_vertex_buffer_data[] = {
-            20.0f, 0.0f, 0.0f,
-            0.0f, 0.0f, 0.0f
-    };
+    // Data
+    generateData();
+
+//    glGenVertexArrays(1, &vaoIDFloor);
+//    glBindVertexArray(vaoIDFloor);
+//
+    GLuint vboIDFloor[2];
+//    glGenVertexArrays(1, vboIDFloor);
+//
+//    glBindBuffer(GL_ARRAY_BUFFER, vboIDFloor[0]);
+//    glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
+//    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+//    glEnableVertexAttribArray(0);  // Vertex position
+//
+//    glBindVertexArray(0);
 
     glGenVertexArrays(1, &vaoIDFloor);
     glBindVertexArray(vaoIDFloor);
 
-    GLuint vboIDFloor[4];
-    glGenVertexArrays(1, vboIDFloor);
+    glGenBuffers(2, vboIDFloor);
 
     glBindBuffer(GL_ARRAY_BUFFER, vboIDFloor[0]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
     glEnableVertexAttribArray(0);  // Vertex position
 
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboIDFloor[1]);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elems), elems, GL_STATIC_DRAW);
+
     glBindVertexArray(0);
+
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
     // Handle input
 
@@ -226,8 +273,6 @@ void display()
 
     glUseProgram(program1);
 
-    material = glm::vec4(0, 0.8, 0.8, 1);
-
     // Uniform variables
     glUniformMatrix4fv(mvpMatrixLoc, 1, GL_FALSE, &prodMatrix[0][0]);
     glUniformMatrix4fv(mvMatrixLoc, 1, GL_FALSE, &mvMatrix[0][0]);
@@ -237,32 +282,22 @@ void display()
     glUniform1f(dLoc, d);
 
     // Actual drawing
+    glPolygonMode(GL_FRONT_AND_BACK, mode);
     glBindVertexArray(vaoID);
     glDrawArrays(GL_PATCHES, 0, 2048);
     glPatchParameteri(GL_PATCH_VERTICES, 16);
 
-    // Floor (well, just a little line for now)
+    // Floor
 
     glUseProgram(program2);
-
-    // 1st attribute buffer : vertices
-    glEnableVertexAttribArray(0);
-    glBindVertexArray(vaoIDFloor);
-
-    glVertexAttribPointer(
-            0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-            3,                  // size
-            GL_FLOAT,           // type
-            GL_FALSE,           // normalized?
-            0,                  // stride
-            NULL           // array buffer offset
-    );
 
     // Uniform variables
     glUniformMatrix4fv(mvpMatrixLoc2, 1, GL_FALSE, &prodMatrix[0][0]);
 
-    // Draw the line !
-    glDrawArrays(GL_LINES, 0, 2); // 2 indices for the 2 end points of 1 line
+    // Actual drawing
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glBindVertexArray(vaoIDFloor);
+    glDrawElements(GL_QUADS, 81 * 4, GL_UNSIGNED_SHORT, NULL);
 
 
     glFlush();

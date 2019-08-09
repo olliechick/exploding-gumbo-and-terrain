@@ -18,9 +18,10 @@
 
 using namespace std;
 
-GLuint vaoID;
-GLuint mvMatrixLoc, mvpMatrixLoc, norMatrixLoc, lgtLoc, materialLoc, dLoc;
+GLuint vaoID, vaoIDFloor;
+GLuint mvMatrixLoc, mvpMatrixLoc, norMatrixLoc, lgtLoc, materialLoc, dLoc, mvpMatrixLoc2;
 GLenum mode = GL_FILL;
+GLuint program1, program2;
 float cam_angle, look_angle = 0;
 glm::mat4 proj, view, projView;
 glm::vec4 material;
@@ -68,7 +69,6 @@ void checkProgram(GLuint program)
     }
 }
 
-
 void handleKeyboardInput(unsigned char key, int x, int y)
 {
     if (key == 'w') {
@@ -76,10 +76,14 @@ void handleKeyboardInput(unsigned char key, int x, int y)
         else mode = GL_FILL;
         glPolygonMode(GL_FRONT_AND_BACK, mode);
     } else if (key == ' ') material.r += 0.05;
+
+    glutPostRedisplay();
 }
 
 void handleSpecialInput(int key, int x, int y)
 {
+    glUseProgram(program1);
+
     if (key == GLUT_KEY_UP) {
         eye.x += sin(cam_angle);
         eye.z -= cos(cam_angle);
@@ -93,28 +97,33 @@ void handleSpecialInput(int key, int x, int y)
     d = sqrt(deltax * deltax + deltaz * deltaz);
     cout << d << "\n";
     lookAt = glm::vec3(eye.x + 100 * sin(cam_angle), eye.y, eye.z - 100 * cos(cam_angle));
-}
 
+    glutPostRedisplay();
+}
 
 void initialise()
 {
+
+    // Model
+
+    program1 = glCreateProgram();
+
+    // Load and attach shaders
     GLuint shaderv = loadShader(GL_VERTEX_SHADER, "shaders/Scene.vert");
     GLuint shaderc = loadShader(GL_TESS_CONTROL_SHADER, "shaders/Scene.tesc");
     GLuint shadere = loadShader(GL_TESS_EVALUATION_SHADER, "shaders/Scene.tese");
     GLuint shaderf = loadShader(GL_FRAGMENT_SHADER, "shaders/Scene.frag");
     GLuint shaderg = loadShader(GL_GEOMETRY_SHADER, "shaders/Scene.geom");
-
-    GLuint program1 = glCreateProgram();
     glAttachShader(program1, shaderv);
     glAttachShader(program1, shaderc);
     glAttachShader(program1, shadere);
     glAttachShader(program1, shaderf);
     glAttachShader(program1, shaderg);
     glLinkProgram(program1);
-
     checkProgram(program1);
     glUseProgram(program1);
 
+    // Uniform variables
     mvpMatrixLoc = glGetUniformLocation(program1, "mvpMatrix");
     mvMatrixLoc = glGetUniformLocation(program1, "mvMatrix");
     norMatrixLoc = glGetUniformLocation(program1, "norMatrix");
@@ -122,9 +131,11 @@ void initialise()
     materialLoc = glGetUniformLocation(program1, "material");
     dLoc = glGetUniformLocation(program1, "d");
 
+    // Matrices and vectors
     proj = glm::perspective(20.0f * CDR, 1.0f, 10.0f, 1000.0f);  //perspective projection matrix
     eye = glm::vec3(0.0, 10.0, 100.0);
     lookAt = glm::vec3(eye.x + 100 * sin(cam_angle), eye.y, eye.z - 100 * cos(cam_angle));
+    material = glm::vec4(0, 0.8, 0.8, 1);
 
     //Read coordinates from file
     ifstream infile;
@@ -137,11 +148,10 @@ void initialise()
     }
     infile.close();
 
-    GLuint vboID[4];
-
     glGenVertexArrays(1, &vaoID);
     glBindVertexArray(vaoID);
 
+    GLuint vboID[4];
     glGenVertexArrays(1, vboID);
 
     glBindBuffer(GL_ARRAY_BUFFER, vboID[0]);
@@ -156,25 +166,69 @@ void initialise()
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-    material = glm::vec4(0, 0.8, 0.8, 1);
+    // Floor
+
+    program2 = glCreateProgram();
+
+    // Load and attach shaders
+    GLuint shaderfloorv = loadShader(GL_VERTEX_SHADER, "shaders/Floor.vert");
+    GLuint shaderfloorf = loadShader(GL_FRAGMENT_SHADER, "shaders/Floor.frag");
+    glAttachShader(program2, shaderfloorv);
+    glAttachShader(program2, shaderfloorf);
+    glLinkProgram(program2);
+    checkProgram(program2);
+    glUseProgram(program2);
+
+    // Uniform variables
+    mvpMatrixLoc2 = glGetUniformLocation(program2, "mvpMatrix");
+
+    // Temp data
+    static const GLfloat g_vertex_buffer_data[] = {
+            20.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 0.0f
+    };
+
+    glGenVertexArrays(1, &vaoIDFloor);
+    glBindVertexArray(vaoIDFloor);
+
+    GLuint vboIDFloor[4];
+    glGenVertexArrays(1, vboIDFloor);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vboIDFloor[0]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+    glEnableVertexAttribArray(0);  // Vertex position
+
+    glBindVertexArray(0);
+
+    // Handle input
+
     glutKeyboardFunc(handleKeyboardInput);
     glutSpecialFunc(handleSpecialInput);
 }
 
 void display()
 {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // Matrices
     view = glm::lookAt(eye, lookAt, glm::vec3(0.0, 1.0, 0.0)); //view matrix
     projView = proj * view;  //Product matrix
-
     glm::mat4 mvMatrix = glm::mat4(1.0);
     mvMatrix = glm::rotate(mvMatrix, CDR, glm::vec3(0.0, 1.0, 0.0));  //rotation matrix
     glm::mat4 prodMatrix = projView * mvMatrix;        //Model-view-proj matrix
     glm::mat4 invMatrix = glm::inverse(mvMatrix);  //Inverse of model-view matrix for normal transformation
     mvMatrix = view * mvMatrix;
-
     glm::vec4 light = glm::vec4(20.0, 10.0, 20.0, 1.0);
     glm::vec4 lightEye = view * light;     //Light position in eye coordinates
 
+    // Model
+
+    glUseProgram(program1);
+
+    material = glm::vec4(0, 0.8, 0.8, 1);
+
+    // Uniform variables
     glUniformMatrix4fv(mvpMatrixLoc, 1, GL_FALSE, &prodMatrix[0][0]);
     glUniformMatrix4fv(mvMatrixLoc, 1, GL_FALSE, &mvMatrix[0][0]);
     glUniformMatrix4fv(norMatrixLoc, 1, GL_TRUE, &invMatrix[0][0]);  //Use transpose matrix here
@@ -182,10 +236,35 @@ void display()
     glUniform4fv(materialLoc, 1, &material[0]);
     glUniform1f(dLoc, d);
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    // Actual drawing
     glBindVertexArray(vaoID);
     glDrawArrays(GL_PATCHES, 0, 2048);
     glPatchParameteri(GL_PATCH_VERTICES, 16);
+
+    // Floor (well, just a little line for now)
+
+    glUseProgram(program2);
+
+    // 1st attribute buffer : vertices
+    glEnableVertexAttribArray(0);
+    glBindVertexArray(vaoIDFloor);
+
+    glVertexAttribPointer(
+            0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+            3,                  // size
+            GL_FLOAT,           // type
+            GL_FALSE,           // normalized?
+            0,                  // stride
+            NULL           // array buffer offset
+    );
+
+    // Uniform variables
+    glUniformMatrix4fv(mvpMatrixLoc2, 1, GL_FALSE, &prodMatrix[0][0]);
+
+    // Draw the line !
+    glDrawArrays(GL_LINES, 0, 2); // 2 indices for the 2 end points of 1 line
+
+
     glFlush();
 }
 
@@ -207,6 +286,7 @@ int main(int argc, char **argv)
     }
 
     initialise();
+    display();
     glutDisplayFunc(display);
     glutMainLoop();
 }

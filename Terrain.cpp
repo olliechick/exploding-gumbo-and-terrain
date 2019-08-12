@@ -15,7 +15,7 @@
 #include <GL/freeglut.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include "loadTGA.h"
+#include "Terrain/res/loadTGA.h"
 
 using namespace std;
 
@@ -65,7 +65,7 @@ void loadTextures()
     glGenTextures(1, &texID);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texID);
-    loadTGA("HeightMap1.tga");
+    loadTGA("Terrain/res/HeightMap1.tga");
 
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -107,8 +107,8 @@ void initialise()
 //--------Load terrain height map-----------
     loadTextures();
 //--------Load shaders----------------------
-    GLuint shaderv = loadShader(GL_VERTEX_SHADER, "Terrain.vert");
-    GLuint shaderf = loadShader(GL_FRAGMENT_SHADER, "Terrain.frag");
+    GLuint shaderv = loadShader(GL_VERTEX_SHADER, "Terrain/shaders/Terrain.vert");
+    GLuint shaderf = loadShader(GL_FRAGMENT_SHADER, "Terrain/shaders/Terrain.frag");
 
     GLuint program = glCreateProgram();
     glAttachShader(program, shaderv);

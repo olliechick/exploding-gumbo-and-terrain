@@ -26,6 +26,9 @@ if (NOT GLEW_FOUND)
     message(ERROR " GLEW not found!")
 endif (NOT GLEW_FOUND)
 
+
+# Scene
+
 add_executable(scene Scene.cpp)
 
 # Add custom target to copy shaders into binary directory on every build
@@ -40,3 +43,25 @@ target_link_libraries(scene ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} ${GLEW_LIBRARY})
 
 # Copy resources into binary directory
 file(COPY PatchFiles DESTINATION ${CMAKE_BINARY_DIR})
+
+
+# Terrain
+
+add_executable(terrain Terrain.cpp)
+
+# Add custom target to copy shaders into binary directory on every build
+add_custom_target(copy_terrain_shaders
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/Terrain/shaders ${CMAKE_BINARY_DIR}/Terrain/shaders
+        COMMENT "Copying terrain shaders" VERBATIM)
+add_dependencies(terrain copy_terrain_shaders)
+
+# Add custom target to copy resources into binary directory on every build
+add_custom_target(copy_res
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/Terrain/res ${CMAKE_BINARY_DIR}/Terrain/res
+        COMMENT "Copying resources" VERBATIM)
+add_dependencies(terrain copy_res)
+
+# Link all dependencies
+target_link_libraries(terrain ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} ${GLEW_LIBRARY})

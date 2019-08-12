@@ -105,7 +105,7 @@ void handleSpecialInput(int key, int x, int y)
 
 //Generate vertex and element data for the terrain floor
 //From Terrain.cpp
-void generateData()
+void generateFloorData()
 {
     int indx, start;
     //verts array
@@ -214,7 +214,7 @@ void initialise()
     mvpMatrixLoc2 = glGetUniformLocation(program2, "mvpMatrix");
 
     // Data
-    generateData();
+    generateFloorData();
 
 //    glGenVertexArrays(1, &vaoIDFloor);
 //    glBindVertexArray(vaoIDFloor);

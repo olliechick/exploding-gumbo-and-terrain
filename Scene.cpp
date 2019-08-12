@@ -247,7 +247,7 @@ void initialise()
 
 void update(int _)
 {
-    if (isExploding) t++;
+    if (isExploding) t += 0.1;
     glutTimerFunc(50, update, 0);
     glutPostRedisplay();
 }

@@ -49,17 +49,12 @@ file(COPY PatchFiles DESTINATION ${CMAKE_BINARY_DIR})
 
 add_executable(terrain Terrain.cpp)
 
-# Add custom target to copy shaders into binary directory on every build
-add_custom_target(copy_terrain_shaders
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_SOURCE_DIR}/Terrain/shaders ${CMAKE_BINARY_DIR}/Terrain/shaders
-        COMMENT "Copying terrain shaders" VERBATIM)
-add_dependencies(terrain copy_terrain_shaders)
+add_dependencies(terrain copy_shaders)
 
 # Add custom target to copy resources into binary directory on every build
 add_custom_target(copy_res
         COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_SOURCE_DIR}/Terrain/res ${CMAKE_BINARY_DIR}/Terrain/res
+        ${CMAKE_SOURCE_DIR}/res ${CMAKE_BINARY_DIR}/res
         COMMENT "Copying resources" VERBATIM)
 add_dependencies(terrain copy_res)
 

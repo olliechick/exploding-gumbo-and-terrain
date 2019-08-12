@@ -178,7 +178,7 @@ int main(int argc, char **argv)
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_SINGLE | GLUT_DEPTH);
     glutInitWindowSize(1000, 800);
-    glutCreateWindow("Terrain");
+    glutCreateWindow("COSC422 assignment 1 part 2: Ollie Chick");
     glutInitContextVersion(4, 2);
     glutInitContextProfile(GLUT_CORE_PROFILE);
 

@@ -217,19 +217,8 @@ void initialise()
 
     // Data
     generateFloorData();
-
-//    glGenVertexArrays(1, &vaoIDFloor);
-//    glBindVertexArray(vaoIDFloor);
 //
     GLuint vboIDFloor[2];
-//    glGenVertexArrays(1, vboIDFloor);
-//
-//    glBindBuffer(GL_ARRAY_BUFFER, vboIDFloor[0]);
-//    glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
-//    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-//    glEnableVertexAttribArray(0);  // Vertex position
-//
-//    glBindVertexArray(0);
 
     glGenVertexArrays(1, &vaoIDFloor);
     glBindVertexArray(vaoIDFloor);

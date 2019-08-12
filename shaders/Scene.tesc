@@ -1,17 +1,28 @@
 #version 400
 
 #define CDR 3.14159265 / 180.0
+#define NUM_VERTICES 16
 
-layout(vertices = 16) out;
+layout(vertices = NUM_VERTICES) out;
 uniform float d;
 uniform float t;
+
+vec4 calculate_d()
+{
+    vec4 averageP = vec4(0);
+    for (int i = 0; i < NUM_VERTICES; i++) {
+        averageP += gl_in[gl_InvocationID].gl_Position;
+    }
+    averageP /= NUM_VERTICES;
+    return averageP;
+}
 
 void main()
 {
     vec4 P = gl_in[gl_InvocationID].gl_Position;
     float theta = 30 * CDR;
     float v = 1;
-    vec4 initial_d = P;
+    vec4 initial_d = calculate_d();
     float g = 9.81;
 
     float vy = v * sin(theta);

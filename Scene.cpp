@@ -19,7 +19,7 @@
 using namespace std;
 
 GLuint vaoID, vaoIDFloor;
-GLuint mvMatrixLoc, mvpMatrixLoc, norMatrixLoc, lgtLoc, materialLoc, dLoc, mvpMatrixLoc2;
+GLuint mvMatrixLoc, mvpMatrixLoc, norMatrixLoc, lgtLoc, materialLoc, dLoc, tLoc, mvpMatrixLoc2;
 GLenum mode = GL_FILL;
 GLuint program1, program2;
 float cam_angle = 0;
@@ -28,7 +28,7 @@ GLushort elems[81 * 4];       //Element array for 81 quad patches
 glm::mat4 proj, view, projView;
 glm::vec4 material;
 glm::vec3 eye, lookAt;
-float d;
+float d, t;
 float CDR = 3.14159265 / 180.0;   //Conversion from degrees to radians (required in GLM 0.9.6 and later versions)
 
 GLuint loadShader(GLenum shaderType, string filename)
@@ -104,7 +104,7 @@ void handleSpecialInput(int key, int x, int y)
 
 
 //Generate vertex and element data for the terrain floor
-//From Terrain.cpp
+//Adapted from Terrain.cpp
 void generateFloorData()
 {
     int indx, start;
@@ -162,6 +162,7 @@ void initialise()
     lgtLoc = glGetUniformLocation(program1, "lightPos");
     materialLoc = glGetUniformLocation(program1, "material");
     dLoc = glGetUniformLocation(program1, "d");
+    tLoc = glGetUniformLocation(program1, "t");
 
     // Matrices and vectors
     proj = glm::perspective(20.0f * CDR, 1.0f, 10.0f, 1000.0f);  //perspective projection matrix
@@ -254,6 +255,13 @@ void initialise()
     glutSpecialFunc(handleSpecialInput);
 }
 
+void update(int _)
+{
+    t++;
+    glutTimerFunc(50, update, 0);
+    glutPostRedisplay();
+}
+
 void display()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -280,6 +288,7 @@ void display()
     glUniform4fv(lgtLoc, 1, &lightEye[0]);
     glUniform4fv(materialLoc, 1, &material[0]);
     glUniform1f(dLoc, d);
+    glUniform1f(tLoc, t);
 
     // Actual drawing
     glPolygonMode(GL_FRONT_AND_BACK, mode);
@@ -322,6 +331,7 @@ int main(int argc, char **argv)
     initialise();
     display();
     glutDisplayFunc(display);
+    glutTimerFunc(50, update, 0);
     glutMainLoop();
 }
 

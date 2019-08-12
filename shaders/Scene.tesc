@@ -2,10 +2,11 @@
 
 layout(vertices = 16) out;
 uniform float d;
+uniform float t;
 
 void main()
 {
-    gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
+    gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position + vec4(t, 0, 0, 0);
 
     int dmin = 10;
     int dmax = 200;

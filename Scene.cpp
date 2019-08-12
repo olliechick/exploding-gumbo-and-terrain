@@ -32,6 +32,8 @@ float d, t;
 bool isExploding = false;
 float CDR = 3.14159265 / 180.0;   //Conversion from degrees to radians (required in GLM 0.9.6 and later versions)
 
+void update(int _);
+
 GLuint loadShader(GLenum shaderType, string filename)
 {
     ifstream shaderFile(filename.c_str());
@@ -77,7 +79,12 @@ void handleKeyboardInput(unsigned char key, int x, int y)
     if (key == 'w') {
         if (mode == GL_FILL) mode = GL_LINE;
         else mode = GL_FILL;
-    } else if (key == ' ') isExploding = !isExploding;
+    } else if (key == ' ') {
+        isExploding = !isExploding;
+        if (isExploding) {
+            glutTimerFunc(50, update, 0);
+        }
+    }
 
     glutPostRedisplay();
 }
@@ -136,7 +143,6 @@ void generateFloorData()
 
 void initialise()
 {
-
     // Model
 
     program1 = glCreateProgram();
@@ -247,9 +253,11 @@ void initialise()
 
 void update(int _)
 {
-    if (isExploding) t += 0.1;
-    glutTimerFunc(50, update, 0);
-    glutPostRedisplay();
+    if (isExploding) {
+        t += 0.1;
+        glutTimerFunc(50, update, 0);
+        glutPostRedisplay();
+    }
 }
 
 void display()

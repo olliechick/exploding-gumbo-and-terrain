@@ -29,6 +29,7 @@ glm::mat4 proj, view, projView;
 glm::vec4 material;
 glm::vec3 eye, lookAt;
 float d, t;
+bool isExploding = false;
 float CDR = 3.14159265 / 180.0;   //Conversion from degrees to radians (required in GLM 0.9.6 and later versions)
 
 GLuint loadShader(GLenum shaderType, string filename)
@@ -76,7 +77,7 @@ void handleKeyboardInput(unsigned char key, int x, int y)
     if (key == 'w') {
         if (mode == GL_FILL) mode = GL_LINE;
         else mode = GL_FILL;
-    } else if (key == ' ') material.r += 0.05;
+    } else if (key == ' ') isExploding = !isExploding;
 
     glutPostRedisplay();
 }
@@ -257,7 +258,7 @@ void initialise()
 
 void update(int _)
 {
-    t++;
+    if (isExploding) t++;
     glutTimerFunc(50, update, 0);
     glutPostRedisplay();
 }

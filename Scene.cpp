@@ -23,7 +23,7 @@ GLuint mvMatrixLoc, mvpMatrixLoc, norMatrixLoc, lgtLoc, materialLoc, dLoc, mvpMa
 GLenum mode = GL_FILL;
 GLuint program1, program2;
 float cam_angle = 0;
-float verts[100 * 3];       //10x10 grid (100 vertices)
+float floorVerts[100 * 3];       //10x10 grid (100 vertices)
 GLushort elems[81 * 4];       //Element array for 81 quad patches
 glm::mat4 proj, view, projView;
 glm::vec4 material;
@@ -113,9 +113,9 @@ void generateFloorData()
     {
         for (int j = 0; j < 10; j++) {
             indx = 10 * i + j;
-            verts[3 * indx] = 10 * i - 45;        //x  varies from -45 to +45
-            verts[3 * indx + 1] = 0;            //y  is set to 0 (ground plane)
-            verts[3 * indx + 2] = -10 * j;        //z  varies from 0 to -100
+            floorVerts[3 * indx] = 10 * i - 45;        //x  varies from -45 to +45
+            floorVerts[3 * indx + 1] = 0;            //y  is set to 0 (ground plane)
+            floorVerts[3 * indx + 2] = -10 * j;        //z  varies from 0 to -100
         }
     }
 
@@ -235,7 +235,7 @@ void initialise()
     glGenBuffers(2, vboIDFloor);
 
     glBindBuffer(GL_ARRAY_BUFFER, vboIDFloor[0]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(floorVerts), floorVerts, GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
     glEnableVertexAttribArray(0);  // Vertex position
 
@@ -298,7 +298,6 @@ void display()
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glBindVertexArray(vaoIDFloor);
     glDrawElements(GL_QUADS, 81 * 4, GL_UNSIGNED_SHORT, NULL);
-
 
     glFlush();
 }

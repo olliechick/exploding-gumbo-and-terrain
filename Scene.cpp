@@ -115,7 +115,7 @@ void generateFloorData()
             indx = 10 * i + j;
             floorVerts[3 * indx] = 10 * i - 45;        //x  varies from -45 to +45
             floorVerts[3 * indx + 1] = 0;            //y  is set to 0 (ground plane)
-            floorVerts[3 * indx + 2] = -10 * j;        //z  varies from 0 to -100
+            floorVerts[3 * indx + 2] = -10 * j + 50;        //z  varies from 50 to -50
         }
     }
 
@@ -167,7 +167,7 @@ void initialise()
     proj = glm::perspective(20.0f * CDR, 1.0f, 10.0f, 1000.0f);  //perspective projection matrix
     eye = glm::vec3(0.0, 10.0, 100.0);
     lookAt = glm::vec3(eye.x + 100 * sin(cam_angle), eye.y, eye.z - 100 * cos(cam_angle));
-    material = glm::vec4(0, 0.8, 0.8, 1);
+    material = glm::vec4(0.078, 0.75, 1, 1);
 
     //Read coordinates from file
     ifstream infile;

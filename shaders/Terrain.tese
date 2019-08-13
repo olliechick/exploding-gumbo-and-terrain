@@ -3,6 +3,7 @@
 layout(quads, equal_spacing, ccw) in;
 
 uniform mat4 mvpMatrix;
+uniform sampler2D heightMap;
 vec4 posn;
 
 void main()

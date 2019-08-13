@@ -120,7 +120,6 @@ void handleSpecialInput(int key, int x, int y)
     float deltax = eye.x;
     float deltaz = eye.z;
     d = sqrt(deltax * deltax + deltaz * deltaz);
-    cout << d << "\n"; //todo remove
     lookAt = glm::vec3(eye.x + 100 * sin(cam_angle), eye.y, eye.z - 100 * cos(cam_angle));
 
     glutPostRedisplay();

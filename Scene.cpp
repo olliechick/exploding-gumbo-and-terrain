@@ -88,6 +88,8 @@ void handleKeyboardInput(unsigned char key, int x, int y)
         if (isExploding) {
             glutTimerFunc(50, update, 0);
         }
+    } else if (key == 'r') {
+        t = 0;
     }
 
     glutPostRedisplay();
@@ -103,6 +105,12 @@ void handleSpecialInput(int key, int x, int y)
     } else if (key == GLUT_KEY_DOWN) {
         eye.x -= sin(cam_angle);
         eye.z += cos(cam_angle);
+    } else if (key == GLUT_KEY_PAGE_UP) {
+        eye.x += 10 * sin(cam_angle);
+        eye.z -= 10 * cos(cam_angle);
+    } else if (key == GLUT_KEY_PAGE_DOWN) {
+        eye.x -= 10 * sin(cam_angle);
+        eye.z += 10 * cos(cam_angle);
     }
 
     float deltax = eye.x;
@@ -230,7 +238,7 @@ void initialise()
 
     // Data
     generateFloorData();
-//
+
     GLuint vboIDFloor[2];
 
     glGenVertexArrays(1, &vaoIDFloor);
@@ -261,7 +269,7 @@ void initialise()
 void update(int _)
 {
     if (isExploding) {
-        t += 0.1;
+        t += 0.05;
         glutTimerFunc(50, update, 0);
         glutPostRedisplay();
     }

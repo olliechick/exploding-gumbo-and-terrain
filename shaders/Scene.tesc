@@ -11,30 +11,35 @@ void main()
 {
     // Calculate position based on explosion equations
 
-    float v = 1; // speed
-    float g = 9.81; // gravity
+    vec4 P = vec4(0, 0, 0, 1);
+
+    float v = 1;// speed
+    float g = 9.81;// gravity
 
     // Find middle of patch
-    vec4 P = vec4(0);
+    vec4 initialP = vec4(0);
     for (int i = 0; i < NUM_VERTICES; i++) {
-        P += gl_in[i].gl_Position;
+        initialP += gl_in[i].gl_Position;
     }
-    P /= NUM_VERTICES;
+    initialP /= NUM_VERTICES;
 
     // Offset of point from middle of patch
-    vec4 offset = gl_in[gl_InvocationID].gl_Position - P;
+    vec4 offset = gl_in[gl_InvocationID].gl_Position - initialP;
 
-    float theta = acos(P.y / length(P));
-    float vy = v * sin(theta);
+    float theta = acos(initialP.y / length(initialP));
+    float vy = v * sin(theta) * 30;
     float vh = v * cos(theta);
 
-    P.y = P.y + vy * t - (g*t*t)/2.0;
+    float h = gl_in[gl_InvocationID].gl_Position.y;
+    // from j.mp/31zrnoH    t = [V₀* sin(α)    +     √(    V₀* sin(α))²       + 2*g*h)] / g
+    float time_to_reach_floor = (vy + sqrt(pow(vy, 2) + 2*g*h)) / g;
+    float adjusted_t = min(t, time_to_reach_floor);// make t not go above time_to_reach_floor
 
-    P.xz = P.xz + P.xz * vh * t;
+    P.y = initialP.y + vy * adjusted_t - (g*adjusted_t*adjusted_t)/2.0;
+    P.xz = initialP.xz + initialP.xz * vh * adjusted_t;
 
-    if (P.y < 0) P.y = 0; // don't go below floor
-    P += offset; // add the offset
-    P.w = 1;
+    if (P.y < 0) P.y = 0;// don't go below floor
+    P += offset;// add the offset
 
     gl_out[gl_InvocationID].gl_Position = P;
 

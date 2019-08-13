@@ -8,5 +8,5 @@ out vec4 gl_Position;
 
 void main()
 {
-    gl_Position = mvpMatrix * position;
+    gl_Position = position;
 }

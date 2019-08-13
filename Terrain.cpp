@@ -109,10 +109,14 @@ void initialise()
 //--------Load shaders----------------------
     GLuint shaderv = loadShader(GL_VERTEX_SHADER, "shaders/Terrain.vert");
     GLuint shaderf = loadShader(GL_FRAGMENT_SHADER, "shaders/Terrain.frag");
+    GLuint shaderc = loadShader(GL_TESS_CONTROL_SHADER, "shaders/Terrain.tesc");
+    GLuint shadere = loadShader(GL_TESS_EVALUATION_SHADER, "shaders/Terrain.tese");
 
     GLuint program = glCreateProgram();
     glAttachShader(program, shaderv);
     glAttachShader(program, shaderf);
+    glAttachShader(program, shaderc);
+    glAttachShader(program, shadere);
     glLinkProgram(program);
 
     GLint status;
@@ -158,6 +162,7 @@ void initialise()
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glPatchParameteri(GL_PATCH_VERTICES, 4);
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
@@ -168,7 +173,7 @@ void display()
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glBindVertexArray(vaoID);
-    glDrawElements(GL_QUADS, 81 * 4, GL_UNSIGNED_SHORT, NULL);
+    glDrawElements(GL_PATCHES, 81 * 4, GL_UNSIGNED_SHORT, NULL);
     glFlush();
 }
 

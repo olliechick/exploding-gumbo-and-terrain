@@ -7,32 +7,38 @@ layout(vertices = NUM_VERTICES) out;
 uniform float d;
 uniform float t;
 
-vec4 calculate_d()
-{
-    vec4 averageP = vec4(0);
-    for (int i = 0; i < NUM_VERTICES; i++) {
-        averageP += gl_in[gl_InvocationID].gl_Position;
-    }
-    averageP /= NUM_VERTICES;
-    return averageP;
-}
-
 void main()
 {
-    vec4 P = gl_in[gl_InvocationID].gl_Position;
-    float theta = 30 * CDR;
-    float v = 1;
-    vec4 initial_d = calculate_d();
-    float g = 9.81;
+    // Calculate position based on explosion equations
 
+    float v = 1; // speed
+    float g = 9.81; // gravity
+
+    // Find middle of patch
+    vec4 P = vec4(0);
+    for (int i = 0; i < NUM_VERTICES; i++) {
+        P += gl_in[i].gl_Position;
+    }
+    P /= NUM_VERTICES;
+
+    // Offset of point from middle of patch
+    vec4 offset = gl_in[gl_InvocationID].gl_Position - P;
+
+    float theta = acos(P.y / length(P));
     float vy = v * sin(theta);
     float vh = v * cos(theta);
 
-    P.y = P.y + vy * t - (g*t*t)/2;
-    P.x = P.x + initial_d.x*vh*t;
-    P.z = P.z + initial_d.z*vh*t;
+    P.y = P.y + vy * t - (g*t*t)/2.0;
+
+    P.xz = P.xz + P.xz * vh * t;
+
+    if (P.y < 0) P.y = 0; // don't go below floor
+    P += offset; // add the offset
+    P.w = 1;
 
     gl_out[gl_InvocationID].gl_Position = P;
+
+    // Calculate tessellation level based on distance from camera
 
     int dmin = 10;
     int dmax = 200;

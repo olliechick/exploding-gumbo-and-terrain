@@ -90,6 +90,10 @@ void handleKeyboardInput(unsigned char key, int x, int y)
         }
     } else if (key == 'r') {
         t = 0;
+        cam_angle = 0;
+        eye = glm::vec3(0.0, 10.0, 100.0);
+        lookAt = glm::vec3(eye.x + 100 * sin(cam_angle), eye.y, eye.z - 100 * cos(cam_angle));
+        isExploding = false;
     }
 
     glutPostRedisplay();

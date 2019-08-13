@@ -28,6 +28,10 @@ GLushort elems[81 * 4];       //Element array for 81 quad patches
 glm::mat4 proj, view, projView;
 glm::vec4 material;
 glm::vec3 eye, lookAt;
+enum Model {
+    Teapot, Gumbo
+};
+Model model = Gumbo;
 float d, t;
 bool isExploding = false;
 float CDR = 3.14159265 / 180.0;   //Conversion from degrees to radians (required in GLM 0.9.6 and later versions)
@@ -179,7 +183,10 @@ void initialise()
 
     //Read coordinates from file
     ifstream infile;
-    infile.open("PatchFiles/PatchVerts_Gumbo.txt", ios::in);
+    string modelName;
+    if (model == Teapot) modelName = "Teapot";
+    else modelName = "Gumbo";
+    infile.open("PatchFiles/PatchVerts_" + modelName + ".txt", ios::in);
     int nvert;
     infile >> nvert;
     float verts[nvert * 3];

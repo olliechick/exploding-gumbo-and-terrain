@@ -78,6 +78,12 @@ void checkProgram(GLuint program)
     }
 }
 
+void calculate_d() {
+    float deltax = eye.x;
+    float deltaz = eye.z;
+    d = sqrt(deltax * deltax + deltaz * deltaz);
+}
+
 void handleKeyboardInput(unsigned char key, int x, int y)
 {
     if (key == 'w') {
@@ -88,10 +94,11 @@ void handleKeyboardInput(unsigned char key, int x, int y)
         if (isExploding) {
             glutTimerFunc(50, update, 0);
         }
-    } else if (key == 'r') {
+    } else if (key == 'r') { // Totally reset scene
         t = 0;
         cam_angle = 0;
         eye = glm::vec3(0.0, 10.0, 100.0);
+        calculate_d();
         lookAt = glm::vec3(eye.x + 100 * sin(cam_angle), eye.y, eye.z - 100 * cos(cam_angle));
         isExploding = false;
     }
@@ -117,9 +124,7 @@ void handleSpecialInput(int key, int x, int y)
         eye.z += 10 * cos(cam_angle);
     }
 
-    float deltax = eye.x;
-    float deltaz = eye.z;
-    d = sqrt(deltax * deltax + deltaz * deltaz);
+    calculate_d();
     lookAt = glm::vec3(eye.x + 100 * sin(cam_angle), eye.y, eye.z - 100 * cos(cam_angle));
 
     glutPostRedisplay();

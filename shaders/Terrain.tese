@@ -16,7 +16,7 @@ void main()
          + u * v *       gl_in[2].gl_Position
          + (1-u) * v *   gl_in[3].gl_Position;
 
-    float x1 = -45, x2 = 45, z1 = 0, z2 = -100;
+    float x1 = -45, x2 = 45, z1 = -100, z2 = 0;
 
     float s = (posn.x - x1)/(x2 - x1);
     float t = (posn.z - z1)/(z2 - z1);

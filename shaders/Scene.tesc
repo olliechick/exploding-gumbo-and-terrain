@@ -17,29 +17,39 @@ void main()
     float g = 9.81;// gravity
 
     // Find middle of patch
-    vec4 initialP = vec4(0);
+    vec4 centre = vec4(0);
     for (int i = 0; i < NUM_VERTICES; i++) {
-        initialP += gl_in[i].gl_Position;
+        centre += gl_in[i].gl_Position;
     }
-    initialP /= NUM_VERTICES;
+    centre /= NUM_VERTICES;
 
     // Offset of point from middle of patch
-    vec4 offset = gl_in[gl_InvocationID].gl_Position - initialP;
+    vec4 offset = gl_in[gl_InvocationID].gl_Position - centre;
 
-    float theta = acos(initialP.y / length(initialP));
-    float vy = v * sin(theta) * 30;
+    float k = 20.0;
+    float theta = asin(centre.y / length(centre));
+    float vy = v * sin(theta) * k;
     float vh = v * cos(theta);
 
     float h = gl_in[gl_InvocationID].gl_Position.y;
-    // from j.mp/31zrnoH    t = [V₀* sin(α)    +     √(    V₀* sin(α))²       + 2*g*h)] / g
-    float time_to_reach_floor = (vy + sqrt(pow(vy, 2) + 2*g*h)) / g;
+    // from j.mp/31zrnoH    t =[V₀*sin(α)+√(V₀*sin(α))²+2 * g * h)] / g
+    float time_to_reach_floor = (vy + sqrt(pow(vy, 2) + 2 * g * h)) / g;
     float adjusted_t = min(t, time_to_reach_floor);// make t not go above time_to_reach_floor
 
-    P.y = initialP.y + vy * adjusted_t - (g*adjusted_t*adjusted_t)/2.0;
-    P.xz = initialP.xz + initialP.xz * vh * adjusted_t;
+    P.y = centre.y + vy * adjusted_t - (g*adjusted_t*adjusted_t)/2.0 + offset.y;
+    P.xz = centre.xz + centre.xz * vh * adjusted_t + offset.xz;
 
-    if (P.y < 0) P.y = 0;// don't go below floor
-    P += offset;// add the offset
+    // find the smallest (most negative) offset
+    float smallest_y_offset = 0;
+    for (int i = 0; i < NUM_VERTICES; i++) {
+        float other_offest = gl_in[i].gl_Position.y - centre.y;
+        if (other_offest < smallest_y_offset) smallest_y_offset = other_offest;
+    }
+
+    if (P.y - offset.y + smallest_y_offset < 0) {
+        // some part of the fragment is below ground
+        P.y = offset.y - smallest_y_offset;
+    }
 
     gl_out[gl_InvocationID].gl_Position = P;
 

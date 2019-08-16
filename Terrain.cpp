@@ -21,7 +21,7 @@ using namespace std;
 
 GLuint vaoID;
 GLuint theProgram;
-GLuint mvpMatrixLoc, eyeLoc;
+GLuint mvpMatrixLoc, eyeLoc, texLoc;
 
 float CDR = 3.14159265 / 180.0;     //Conversion from degrees to rad (required in GLM 0.9.6)
 
@@ -64,11 +64,19 @@ void generateData()
 //Loads terrain texture
 void loadTextures()
 {
-    GLuint texID;
-    glGenTextures(1, &texID);
+    GLuint texID[2];
+    glGenTextures(2, texID);
+
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texID);
+    glBindTexture(GL_TEXTURE_2D, texID[0]);
     loadTGA("res/HeightMap1.tga");
+
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, texID[1]);
+    loadTGA("res/HeightMap2.tga");
 
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -119,9 +127,16 @@ void handleKeyboardInput(unsigned char key, int x, int y)
         cam_angle = 0;
         eye = glm::vec3(0.0, 20.0, 30.0);
         calculate_d();
+    } else if (key == '1') {
+      //  glActiveTexture(GL_TEXTURE0);
+        glUniform1i(texLoc, 0);
+    } else if (key == '2') {
+       // glActiveTexture(GL_TEXTURE1);
+        glUniform1i(texLoc, 1);
     }
 
     glutPostRedisplay();
+
 }
 
 void handleSpecialInput(int key, int x, int y)
@@ -175,7 +190,7 @@ void initialise()
     glUseProgram(program);
 
     mvpMatrixLoc = glGetUniformLocation(program, "mvpMatrix");
-    GLuint texLoc = glGetUniformLocation(program, "heightMap");
+    texLoc = glGetUniformLocation(program, "heightMap");
     glUniform1i(texLoc, 0);
 
 //--------Compute matrices----------------------

@@ -127,6 +127,8 @@ void handleKeyboardInput(unsigned char key, int x, int y)
         cam_angle = 0;
         eye = glm::vec3(0.0, 20.0, 30.0);
         calculate_d();
+        glUniform1i(texLoc, 0);
+        mode = GL_FILL;
     } else if (key == '1') {
       //  glActiveTexture(GL_TEXTURE0);
         glUniform1i(texLoc, 0);

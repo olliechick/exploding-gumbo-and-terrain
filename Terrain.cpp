@@ -21,7 +21,7 @@ using namespace std;
 
 GLuint vaoID;
 GLuint theProgram;
-GLuint mvpMatrixLoc;
+GLuint mvpMatrixLoc, eyeLoc;
 
 float CDR = 3.14159265 / 180.0;     //Conversion from degrees to rad (required in GLM 0.9.6)
 
@@ -218,6 +218,7 @@ void display()
     projView = proj * view;  //Product (mvp) matrix
 
     glUniformMatrix4fv(mvpMatrixLoc, 1, GL_FALSE, &projView[0][0]);
+    glUniform3fv(eyeLoc, 1, &eye[0]);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glPolygonMode(GL_FRONT_AND_BACK, mode);

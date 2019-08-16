@@ -28,7 +28,10 @@ float CDR = 3.14159265 / 180.0;     //Conversion from degrees to rad (required i
 float verts[100 * 3];       //10x10 grid (100 vertices)
 GLushort elems[81 * 4];       //Element array for 81 quad patches
 
-glm::mat4 projView;
+glm::mat4 proj, view, projView;
+glm::vec3 eye, lookAt;
+float cam_angle = 0, d;
+GLenum mode = GL_FILL;
 
 //Generate vertex and element data for the terrain floor
 void generateData()
@@ -100,10 +103,50 @@ GLuint loadShader(GLenum shaderType, string filename)
     return shader;
 }
 
+void calculate_d()
+{
+    float deltax = eye.x;
+    float deltaz = eye.z;
+    d = sqrt(deltax * deltax + deltaz * deltaz);
+}
+
+void handleKeyboardInput(unsigned char key, int x, int y)
+{
+    if (key == 'w') {
+        if (mode == GL_FILL) mode = GL_LINE;
+        else mode = GL_FILL;
+    } else if (key == 'r') { // Totally reset scene
+        cam_angle = 0;
+        eye = glm::vec3(0.0, 20.0, 30.0);
+        calculate_d();
+    }
+
+    glutPostRedisplay();
+}
+
+void handleSpecialInput(int key, int x, int y)
+{
+    if (key == GLUT_KEY_UP) {
+        eye.x += sin(cam_angle);
+        eye.z -= cos(cam_angle);
+    } else if (key == GLUT_KEY_DOWN) {
+        eye.x -= sin(cam_angle);
+        eye.z += cos(cam_angle);
+    } else if (key == GLUT_KEY_PAGE_UP) {
+        eye.x += 10 * sin(cam_angle);
+        eye.z -= 10 * cos(cam_angle);
+    } else if (key == GLUT_KEY_PAGE_DOWN) {
+        eye.x -= 10 * sin(cam_angle);
+        eye.z += 10 * cos(cam_angle);
+    }
+
+    calculate_d();
+    glutPostRedisplay();
+}
+
 //Initialise the shader program, create and load buffer data
 void initialise()
 {
-    glm::mat4 proj, view;   //Projection and view matrices
 //--------Load terrain height map-----------
     loadTextures();
 //--------Load shaders----------------------
@@ -137,8 +180,7 @@ void initialise()
 
 //--------Compute matrices----------------------
     proj = glm::perspective(30.0f * CDR, 1.25f, 20.0f, 500.0f);  //perspective projection matrix
-    view = glm::lookAt(glm::vec3(0.0, 20.0, 30.0), glm::vec3(0.0, 0.0, -40.0), glm::vec3(0.0, 1.0, 0.0)); //view matrix
-    projView = proj * view;  //Product (mvp) matrix
+    eye = glm::vec3(0.0, 20.0, 30.0);
 
 //---------Load buffer data-----------------------
     generateData();
@@ -161,17 +203,24 @@ void initialise()
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glPatchParameteri(GL_PATCH_VERTICES, 4);
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+
+    glutKeyboardFunc(handleKeyboardInput);
+    glutSpecialFunc(handleSpecialInput);
 }
 
 //Display function to compute uniform values based on transformation parameters and to draw the scene
 void display()
 {
+    lookAt = glm::vec3(eye.x + 100 * sin(cam_angle), eye.y - 20, eye.z - 100 * cos(cam_angle) + 30);
+    view = glm::lookAt(eye, lookAt, glm::vec3(0.0, 1.0, 0.0)); //view matrix
+    projView = proj * view;  //Product (mvp) matrix
+
     glUniformMatrix4fv(mvpMatrixLoc, 1, GL_FALSE, &projView[0][0]);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glPolygonMode(GL_FRONT_AND_BACK, mode);
     glBindVertexArray(vaoID);
     glDrawElements(GL_PATCHES, 81 * 4, GL_UNSIGNED_SHORT, NULL);
     glFlush();
@@ -196,6 +245,7 @@ int main(int argc, char **argv)
     }
 
     initialise();
+    display();
     glutDisplayFunc(display);
     glutMainLoop();
 }

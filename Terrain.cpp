@@ -20,8 +20,8 @@
 using namespace std;
 
 GLuint vaoID;
-GLuint theProgram;
-GLuint mvpMatrixLoc, eyeLoc, texLoc;
+GLuint mvpMatrixLoc, eyeLoc, texLoc, lightLoc;
+float angle = 0;
 
 float CDR = 3.14159265 / 180.0;     //Conversion from degrees to rad (required in GLM 0.9.6)
 
@@ -82,7 +82,6 @@ void loadTextures()
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 }
 
-
 //Loads a shader file and returns the reference to a shader object
 GLuint loadShader(GLenum shaderType, string filename)
 {
@@ -130,11 +129,13 @@ void handleKeyboardInput(unsigned char key, int x, int y)
         glUniform1i(texLoc, 0);
         mode = GL_FILL;
     } else if (key == '1') {
-      //  glActiveTexture(GL_TEXTURE0);
         glUniform1i(texLoc, 0);
     } else if (key == '2') {
-       // glActiveTexture(GL_TEXTURE1);
         glUniform1i(texLoc, 1);
+    } else if (key == 'a') {
+        angle -= 0.05;
+    } else if (key == 'd') {
+        angle += 0.05;
     }
 
     glutPostRedisplay();
@@ -195,6 +196,7 @@ void initialise()
 
     mvpMatrixLoc = glGetUniformLocation(program, "mvpMatrix");
     texLoc = glGetUniformLocation(program, "heightMap");
+    lightLoc = glGetUniformLocation(program, "light");
     glUniform1i(texLoc, 0);
 
 //--------Compute matrices----------------------
@@ -235,9 +237,11 @@ void display()
     lookAt = glm::vec3(eye.x + 100 * sin(cam_angle), eye.y - 20, eye.z - 100 * cos(cam_angle) + 30);
     view = glm::lookAt(eye, lookAt, glm::vec3(0.0, 1.0, 0.0)); //view matrix
     projView = proj * view;  //Product (mvp) matrix
+    glm::vec4 light = normalize(glm::vec4(50 * sin(angle), 50 * cos(angle), -50, 0));
 
     glUniformMatrix4fv(mvpMatrixLoc, 1, GL_FALSE, &projView[0][0]);
     glUniform3fv(eyeLoc, 1, &eye[0]);
+    glUniform4fv(lightLoc, 1, &light[0]);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glPolygonMode(GL_FRONT_AND_BACK, mode);
@@ -245,7 +249,6 @@ void display()
     glDrawElements(GL_PATCHES, 81 * 4, GL_UNSIGNED_SHORT, NULL);
     glFlush();
 }
-
 
 int main(int argc, char **argv)
 {

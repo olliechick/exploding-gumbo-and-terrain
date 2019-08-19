@@ -171,12 +171,14 @@ void initialise()
     GLuint shaderf = loadShader(GL_FRAGMENT_SHADER, "shaders/Terrain.frag");
     GLuint shaderc = loadShader(GL_TESS_CONTROL_SHADER, "shaders/Terrain.tesc");
     GLuint shadere = loadShader(GL_TESS_EVALUATION_SHADER, "shaders/Terrain.tese");
+    GLuint shaderg = loadShader(GL_GEOMETRY_SHADER, "shaders/Terrain.geom");
 
     GLuint program = glCreateProgram();
     glAttachShader(program, shaderv);
     glAttachShader(program, shaderf);
     glAttachShader(program, shaderc);
     glAttachShader(program, shadere);
+    glAttachShader(program, shaderg);
     glLinkProgram(program);
 
     GLint status;

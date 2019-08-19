@@ -21,5 +21,5 @@ void main()
     gl_TessLevelOuter[2] =
     gl_TessLevelOuter[3] =
     gl_TessLevelInner[0] =
-    gl_TessLevelInner[1] = max(1, ((zavg + 100) * 18) / 100 + 2);
+    gl_TessLevelInner[1] = max(1, ((zavg + 100) * 18) / 50 + 12);
 }

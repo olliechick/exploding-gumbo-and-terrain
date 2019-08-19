@@ -2,7 +2,6 @@
 
 layout(quads, equal_spacing, ccw) in;
 
-uniform mat4 mvpMatrix;
 uniform sampler2D heightMap;
 vec4 posn;
 
@@ -24,5 +23,5 @@ void main()
     vec4 color = texture(heightMap, vec2(s, t));
     posn.y = color.r * 10;
 
-    gl_Position = mvpMatrix * posn;
+    gl_Position = posn;
 }

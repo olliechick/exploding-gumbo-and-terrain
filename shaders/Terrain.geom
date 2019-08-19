@@ -3,6 +3,7 @@
 layout (triangles) in;
 layout (triangle_strip, max_vertices = 3) out;
 
+uniform mat4 mvpMatrix;
 in vec4 color[3];
 out vec4 oColor;
 
@@ -23,7 +24,7 @@ void main()
     vec4 diffuse = dot(l, n) * material;
 
     for (int i = 0; i < 3; i++) {
-        gl_Position = gl_in[i].gl_Position;
+        gl_Position = mvpMatrix * gl_in[i].gl_Position;
         oColor = ambient + diffuse;
         EmitVertex();
     }

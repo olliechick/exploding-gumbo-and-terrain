@@ -17,11 +17,16 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include "res/loadTGA.h"
 
+#define PI 3.14159265358979
+#define ANGLE_INCREMENT PI / 90
+
 using namespace std;
 
 GLuint vaoID;
 GLuint mvpMatrixLoc, eyeLoc, texLoc, lightLoc;
+
 float angle = 0;
+bool autoRotate = false;
 
 float CDR = 3.14159265 / 180.0;     //Conversion from degrees to rad (required in GLM 0.9.6)
 
@@ -103,7 +108,6 @@ GLuint loadShader(GLenum shaderType, string filename)
         glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
         GLchar *strInfoLog = new GLchar[infoLogLength + 1];
         glGetShaderInfoLog(shader, infoLogLength, NULL, strInfoLog);
-        const char *strShaderType = NULL;
         cerr << "Compile failure in shader: " << strInfoLog << endl;
         delete[] strInfoLog;
     }
@@ -133,13 +137,14 @@ void handleKeyboardInput(unsigned char key, int x, int y)
     } else if (key == '2') {
         glUniform1i(texLoc, 1);
     } else if (key == 'a') {
-        angle -= 0.05;
+        angle -= ANGLE_INCREMENT;
     } else if (key == 'd') {
-        angle += 0.05;
+        angle += ANGLE_INCREMENT;
+    } else if (key == 's') {
+        autoRotate = !autoRotate;
     }
 
     glutPostRedisplay();
-
 }
 
 void handleSpecialInput(int key, int x, int y)
@@ -231,6 +236,16 @@ void initialise()
     glutSpecialFunc(handleSpecialInput);
 }
 
+void update(int _)
+{
+    if (autoRotate) {
+        angle += ANGLE_INCREMENT;
+        glutPostRedisplay();
+    }
+
+    glutTimerFunc(50, update, 0);
+}
+
 //Display function to compute uniform values based on transformation parameters and to draw the scene
 void display()
 {
@@ -270,6 +285,7 @@ int main(int argc, char **argv)
     initialise();
     display();
     glutDisplayFunc(display);
+    glutTimerFunc(50, update, 0);
     glutMainLoop();
 }
 

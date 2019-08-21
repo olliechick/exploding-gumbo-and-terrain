@@ -4,28 +4,57 @@ layout (triangles) in;
 layout (triangle_strip, max_vertices = 3) out;
 
 uniform mat4 mvpMatrix;
+uniform vec4 light;
 in vec4 color[3];
 out vec4 oColor;
-uniform vec4 light;
+out vec3 textureWeights;
+out vec2 textureCoords;
 
 vec4 calculateN(vec3 p1, vec3 p2, vec3 p3) {
     return normalize(vec4(cross(p2 - p1, p3 - p1), 0));
 }
 
-
 void main()
 {
-    vec4 material = vec4(0, 1, 0, 1);
-    float greyLevel = 0.2;
+    // Levels
+    float H = 10;
+    float waterLevel = H/4;
+    float grassLevel = H/2;
+    float grassSnowLevel = 3*H/4;
 
-    vec4 ambient = material * greyLevel;
+    // Modify position to not go below water level
+    vec4 outPosition[3];
+    for (int i = 0; i < 3; i++) {
+        outPosition[i] = gl_in[i].gl_Position;
+        if (outPosition[i].y < waterLevel) outPosition[i].y = waterLevel;
+    }
 
-    vec4 n = calculateN(gl_in[0].gl_Position.xyz, gl_in[1].gl_Position.xyz, gl_in[2].gl_Position.xyz);
-    vec4 diffuse = dot(light, n) * material;
+    // Lighting calculations
+    vec4 n = calculateN(outPosition[0].xyz, outPosition[1].xyz, outPosition[2].xyz);
+    vec4 diffuse = dot(light, n) * vec4(1);
+    oColor = diffuse + vec4(0.3);
 
     for (int i = 0; i < 3; i++) {
-        gl_Position = mvpMatrix * gl_in[i].gl_Position;
-        oColor = ambient + diffuse;
+
+        // Assign texture coordinates
+        float textureScaleFactor = 30;
+        textureCoords.s = (outPosition[i].x + 45) / textureScaleFactor;
+        textureCoords.t = (outPosition[i].z + 100) / textureScaleFactor;
+
+        // Assign texture weights
+        float y = outPosition[i].y;
+        if (y == waterLevel){
+            textureWeights = vec3(1, 0, 0);
+        } else if (y < grassLevel) {
+            textureWeights = vec3(0, 1, 0);
+        } else if (y < grassSnowLevel){
+            float snowTerm = (y - grassLevel) / (grassSnowLevel - grassLevel);
+            textureWeights = vec3(0, 1 - snowTerm, snowTerm);
+        } else {
+            textureWeights = vec3(0, 0, 1);
+        }
+
+        gl_Position = mvpMatrix * outPosition[i];
         EmitVertex();
     }
     EndPrimitive();

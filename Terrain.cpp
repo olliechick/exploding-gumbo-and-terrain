@@ -23,7 +23,7 @@
 using namespace std;
 
 GLuint vaoID;
-GLuint mvpMatrixLoc, eyeLoc, texLoc, lightLoc;
+GLuint mvpMatrixLoc, eyeLoc, heightMapLoc, lightLoc, grassLoc, waterLoc, snowLoc;
 
 float angle = 0;
 bool autoRotate = false;
@@ -69,8 +69,8 @@ void generateData()
 //Loads terrain texture
 void loadTextures()
 {
-    GLuint texID[2];
-    glGenTextures(2, texID);
+    GLuint texID[5];
+    glGenTextures(5, texID);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texID[0]);
@@ -82,6 +82,27 @@ void loadTextures()
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, texID[1]);
     loadTGA("res/HeightMap2.tga");
+
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, texID[2]);
+    loadTGA("res/grass.tga");
+
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, texID[3]);
+    loadTGA("res/water.tga");
+
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+    glActiveTexture(GL_TEXTURE4);
+    glBindTexture(GL_TEXTURE_2D, texID[4]);
+    loadTGA("res/snow.tga");
 
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -130,12 +151,12 @@ void handleKeyboardInput(unsigned char key, int x, int y)
         cam_angle = 0;
         eye = glm::vec3(0.0, 20.0, 30.0);
         calculate_d();
-        glUniform1i(texLoc, 0);
+        glUniform1i(heightMapLoc, 0);
         mode = GL_FILL;
     } else if (key == '1') {
-        glUniform1i(texLoc, 0);
+        glUniform1i(heightMapLoc, 0);
     } else if (key == '2') {
-        glUniform1i(texLoc, 1);
+        glUniform1i(heightMapLoc, 1);
     } else if (key == 'a') {
         angle -= ANGLE_INCREMENT;
     } else if (key == 'd') {
@@ -200,9 +221,17 @@ void initialise()
     glUseProgram(program);
 
     mvpMatrixLoc = glGetUniformLocation(program, "mvpMatrix");
-    texLoc = glGetUniformLocation(program, "heightMap");
     lightLoc = glGetUniformLocation(program, "light");
-    glUniform1i(texLoc, 0);
+
+    heightMapLoc = glGetUniformLocation(program, "heightMap");
+    glUniform1i(heightMapLoc, 0);
+
+    grassLoc = glGetUniformLocation(program, "grass");
+    glUniform1i(grassLoc, 2);
+    waterLoc = glGetUniformLocation(program, "water");
+    glUniform1i(waterLoc, 3);
+    snowLoc = glGetUniformLocation(program, "snow");
+    glUniform1i(snowLoc, 4);
 
 //--------Compute matrices----------------------
     proj = glm::perspective(30.0f * CDR, 1.25f, 20.0f, 500.0f);  //perspective projection matrix

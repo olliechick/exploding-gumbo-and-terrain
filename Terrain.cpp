@@ -153,6 +153,8 @@ void handleKeyboardInput(unsigned char key, int x, int y)
         calculate_d();
         glUniform1i(heightMapLoc, 0);
         mode = GL_FILL;
+        angle = 0;
+        autoRotate = false;
     } else if (key == '1') {
         glUniform1i(heightMapLoc, 0);
     } else if (key == '2') {

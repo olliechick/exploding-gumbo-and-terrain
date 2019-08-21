@@ -5,6 +5,11 @@
 layout(vertices = NUM_VERTICES) out;
 uniform vec3 eye;
 
+float get_tess_level(float z)
+{
+    return max(1, ((z + 100) * 18) / 50 + 12);
+}
+
 void main()
 {
     gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
@@ -16,10 +21,10 @@ void main()
     zavg /= NUM_VERTICES;
     zavg -= eye.z;
 
-    gl_TessLevelOuter[0] =
-    gl_TessLevelOuter[1] =
-    gl_TessLevelOuter[2] =
-    gl_TessLevelOuter[3] =
-    gl_TessLevelInner[0] =
-    gl_TessLevelInner[1] = max(1, ((zavg + 100) * 18) / 50 + 12);
+    gl_TessLevelOuter[0] = get_tess_level(zavg);
+    gl_TessLevelOuter[1] = get_tess_level(gl_in[0].gl_Position.z);
+    gl_TessLevelOuter[2] = get_tess_level(zavg);
+    gl_TessLevelOuter[3] = get_tess_level(gl_in[2].gl_Position.z);
+    gl_TessLevelInner[0] = get_tess_level(zavg);
+    gl_TessLevelInner[1] = get_tess_level(zavg);
 }

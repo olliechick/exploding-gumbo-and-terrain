@@ -5,6 +5,7 @@ layout (triangle_strip, max_vertices = 3) out;
 
 uniform mat4 mvpMatrix;
 uniform vec4 light;
+uniform vec3 scale;
 in vec4 color[3];
 out vec4 oColor;
 out vec3 textureWeights;
@@ -18,9 +19,12 @@ void main()
 {
     // Levels
     float H = 10;
-    float waterLevel = H/4;
-    float grassLevel = H/2;
-    float grassSnowLevel = 3*H/4;
+    float waterScale = scale.x;
+    float grassScale = scale.y;
+    float grassSnowScale = scale.z;
+    float waterLevel = H * waterScale;
+    float grassLevel = H * grassScale;
+    float grassSnowLevel = H * grassSnowScale;
 
     // Modify position to not go below water level
     vec4 outPosition[3];

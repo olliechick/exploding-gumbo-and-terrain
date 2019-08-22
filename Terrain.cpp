@@ -19,14 +19,17 @@
 
 #define PI 3.14159265358979
 #define ANGLE_INCREMENT PI / 90
+#define SCALE_STEP 0.01
 
 using namespace std;
 
 GLuint vaoID;
-GLuint mvpMatrixLoc, eyeLoc, heightMapLoc, lightLoc, grassLoc, waterLoc, snowLoc;
+GLuint mvpMatrixLoc, eyeLoc, heightMapLoc, lightLoc, grassLoc, waterLoc, snowLoc, scaleLoc;
 
 float angle = 0;
 bool autoRotate = false;
+
+float waterScale, grassScale, grassSnowScale;
 
 float CDR = 3.14159265 / 180.0;     //Conversion from degrees to rad (required in GLM 0.9.6)
 
@@ -142,6 +145,13 @@ void calculate_d()
     d = sqrt(deltax * deltax + deltaz * deltaz);
 }
 
+float keep_in_0_to_1_range(float in)
+{
+    if (in < 0) in = 0;
+    if (in > 1) in = 1;
+    return in;
+}
+
 void handleKeyboardInput(unsigned char key, int x, int y)
 {
     if (key == 'w') {
@@ -155,6 +165,9 @@ void handleKeyboardInput(unsigned char key, int x, int y)
         mode = GL_FILL;
         angle = 0;
         autoRotate = false;
+        waterScale = 1.0 / 4;
+        grassScale = 1.0 / 2;
+        grassSnowScale = 3.0 / 4;
     } else if (key == '1') {
         glUniform1i(heightMapLoc, 0);
     } else if (key == '2') {
@@ -165,7 +178,32 @@ void handleKeyboardInput(unsigned char key, int x, int y)
         angle += ANGLE_INCREMENT;
     } else if (key == 's') {
         autoRotate = !autoRotate;
+    } else if (key == 'o') {
+        waterScale -= SCALE_STEP;
+        if (grassScale > grassSnowScale - 0.1) {
+            if (grassSnowScale - 0.1 < waterScale) grassScale = waterScale;
+            else grassScale = grassSnowScale - 0.1;
+        }
+    } else if (key == 'p') {
+        waterScale += SCALE_STEP;
+        if (grassScale < waterScale) grassScale = waterScale;
+        if (grassSnowScale < waterScale) grassSnowScale = waterScale;
+    } else if (key == 'k') {
+        grassSnowScale -= SCALE_STEP;
+        if (waterScale > grassSnowScale) waterScale = grassSnowScale;
+        if (grassScale > grassSnowScale) grassScale = grassSnowScale;
+        grassScale = grassSnowScale - 0.1;
+    } else if (key == 'l') {
+        grassSnowScale += SCALE_STEP;
+        grassScale = grassSnowScale - 0.1;
     }
+
+    waterScale = keep_in_0_to_1_range(waterScale);
+    grassScale = keep_in_0_to_1_range(grassScale);
+    grassSnowScale = keep_in_0_to_1_range(grassSnowScale);
+
+    if (grassScale < waterScale) waterScale;
+
 
     glutPostRedisplay();
 }
@@ -235,9 +273,15 @@ void initialise()
     snowLoc = glGetUniformLocation(program, "snow");
     glUniform1i(snowLoc, 4);
 
+    scaleLoc = glGetUniformLocation(program, "scale");
+
 //--------Compute matrices----------------------
     proj = glm::perspective(30.0f * CDR, 1.25f, 20.0f, 500.0f);  //perspective projection matrix
     eye = glm::vec3(0.0, 20.0, 30.0);
+
+    waterScale = 1.0 / 4;
+    grassScale = 1.0 / 2;
+    grassSnowScale = 3.0 / 4;
 
 //---------Load buffer data-----------------------
     generateData();
@@ -288,6 +332,9 @@ void display()
     glUniformMatrix4fv(mvpMatrixLoc, 1, GL_FALSE, &projView[0][0]);
     glUniform3fv(eyeLoc, 1, &eye[0]);
     glUniform4fv(lightLoc, 1, &light[0]);
+
+    glm::vec3 scale = glm::vec3(waterScale, grassScale, grassSnowScale);
+    glUniform3fv(scaleLoc, 1, &scale[0]);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glPolygonMode(GL_FRONT_AND_BACK, mode);

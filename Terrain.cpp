@@ -41,6 +41,10 @@ glm::vec3 eye, lookAt;
 float cam_angle = 0, d;
 GLenum mode = GL_FILL;
 
+float defaultWaterScale = 0.25;
+float defaultGrassScale = 0.6;
+float defaultGrassSnowScale = 0.7;
+
 //Generate vertex and element data for the terrain floor
 void generateData()
 {
@@ -165,9 +169,9 @@ void handleKeyboardInput(unsigned char key, int x, int y)
         mode = GL_FILL;
         angle = 0;
         autoRotate = false;
-        waterScale = 1.0 / 4;
-        grassScale = 1.0 / 2;
-        grassSnowScale = 3.0 / 4;
+        waterScale = defaultWaterScale;
+        grassScale = defaultGrassScale;
+        grassSnowScale = defaultGrassSnowScale;
     } else if (key == '1') {
         glUniform1i(heightMapLoc, 0);
     } else if (key == '2') {
@@ -279,9 +283,9 @@ void initialise()
     proj = glm::perspective(30.0f * CDR, 1.25f, 20.0f, 500.0f);  //perspective projection matrix
     eye = glm::vec3(0.0, 20.0, 30.0);
 
-    waterScale = 1.0 / 4;
-    grassScale = 1.0 / 2;
-    grassSnowScale = 3.0 / 4;
+    waterScale = defaultWaterScale;
+    grassScale = defaultGrassScale;
+    grassSnowScale = defaultGrassSnowScale;
 
 //---------Load buffer data-----------------------
     generateData();

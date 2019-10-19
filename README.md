@@ -18,6 +18,10 @@ The spacebar triggers an explosion of the elephant; it can also be used to pause
 
 The R key resets the entire scene to its initial state.
 
+## Screenshot
+
+![Gumbo model](https://olliechick.co.nz/images/gumbo.png "Gumbo model")
+
 # Terrain scene
 
 ## Build instructions
@@ -39,3 +43,7 @@ The 1 and 2 keys switch to the mountainous and flat height maps, respectively.
 The A and D keys rotate the light 2° anti-clockwise and clockwise, respectively, around the terrain. The S key toggles auto-rotation of the light — the light rotates clockwise at approximately 40° per second.
 
 The O and P keys lower and raise the water level, respectively. The K and L keys lower and raise the snow level, respectively.
+
+## Screenshot
+
+![Terrain model](https://olliechick.co.nz/images/terrain.png "Terrain model")
